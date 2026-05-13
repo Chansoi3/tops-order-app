@@ -162,9 +162,9 @@
 
     <script>
         // ==========================================
-        // 🔴 นำ URL ใหม่จาก Google Apps Script มาใส่ตรงนี้ครับ
+        // 🔴 นำ URL จาก Google Apps Script (เวอร์ชันใหม่) มาใส่ในเครื่องหมายคำพูดด้านล่างนี้
         // ==========================================
-        const API_URL = "https://script.google.com/macros/s/AKfycbz-xsHAPur-VdgVSAaE0a7zxTpwZW-ycvP8N2Wui_4ZAQ1NdkOeHSnYDqHzNvhqMNZF/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycby3cVv9kbFkshVSNxj8OE5_ISMQUAW8-w1U8yBPEviiz4lZ49LbVwQcn_2_LwlC0LgC/exec"; 
         
         let globalProducts = [];
 
@@ -233,7 +233,6 @@
             document.getElementById('summaryCount').innerText = itemsCount;
         }
 
-        // ฟังก์ชันใหม่ที่แก้ปัญหา Failed to fetch แล้ว 100%
         function submitOrders() {
             const branch = document.getElementById('branchCode').value;
             const orders = [];
@@ -260,7 +259,7 @@
                     orders: orders
                 });
 
-                // ใช้ URLSearchParams หุ้มข้อมูลอีกชั้น เพื่อให้ผ่านด่านความปลอดภัยของเบราว์เซอร์
+                // ส่งแบบฟอร์มเพื่อหลีกเลี่ยง CORS Policy
                 fetch(API_URL, {
                     method: 'POST',
                     body: new URLSearchParams({ payload: payloadData })
@@ -270,6 +269,7 @@
                     hideLoader();
                     if(data.success) {
                         alert(data.message);
+                        // รีเซ็ตหน้าจอใหม่หลังจากส่งสำเร็จ
                         document.getElementById('catalogSection').style.display = 'none';
                         document.getElementById('floatingFooter').style.display = 'none';
                         document.getElementById('branchCode').value = '';
@@ -279,7 +279,7 @@
                 })
                 .catch(err => {
                     hideLoader();
-                    alert("การเชื่อมต่อล้มเหลว (Failed to fetch): " + err);
+                    alert("การเชื่อมต่อล้มเหลว: " + err);
                 });
             }
         }
