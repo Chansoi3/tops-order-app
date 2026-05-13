@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ระบบสั่งสินค้า</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding: 20px; background-color: #f8f9fa; }
+    .card { margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    #productDetails { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="text-center mb-4">ระบบสั่งสินค้า (Web App)</h2>
+
+    <div class="card p-4 border-primary">
+      <h4 class="text-primary">1. ระบุสาขา</h4>
+      <input class="form-control form-control-lg" list="branchOptions" id="branchCode" placeholder="คลิกเพื่อเลือก หรือ พิมพ์รหัสสาขา..." required>
+      <datalist id="branchOptions">
+        <option value="730 - Piean - Pin 2">
+        <option value="5209 - Soi Kusolsin">
+        <option value="5219 - Chaloem Prakiat 30 Yaek 14">
+        <option value="5285 - F.Thaghanrue Bangna">
+        <option value="5291 - Bantheparak">
+        <option value="3100 - Chaloem Phrakiat 14 Yaek 34">
+        <option value="3108 - Supapong3Yaek4">
+        <option value="3109 - Soi Onnut 36">
+        <option value="3110 - Bnangna-Trad Km 6.5 Gas Station">
+        <option value="3118 - Soi Thepharak 8">
+        <option value="3121 - Bangna - Trad Km.8 Gas Station">
+        <option value="6953 - Tops daily Bangchak Bangna Trad K.M.7">
+        <option value="6731 - Tops daily Caltex Srinakarin">
+      </datalist>
+    </div>
+
+    <div class="card p-4">
+      <h4>2. ค้นหาสินค้า</h4>
+      <div class="input-group mb-3">
+        <input type="text" id="barcodeInput" class="form-control form-control-lg" placeholder="สแกนหรือกรอกบาร์โค้ด..." onchange="searchBarcode()">
+        <button class="btn btn-primary" onclick="searchBarcode()">ค้นหา</button>
+      </div>
+      <div id="loading" class="text-primary fw-bold" style="display:none;">กำลังค้นหา...</div>
+
+      <div id="productDetails" class="mt-3">
+        <div class="table-responsive">
+          <table class="table table-bordered bg-white text-center align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>บาร์โค้ด</th><th>ชื่อรายการสินค้า</th><th>โปรโมชั่น</th><th>ราคาปกติ</th><th>ราคาโปรฯ</th><th>Start Date</th><th>End Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="lblBarcode"></td><td id="lblName" class="text-start"></td><td id="lblPromo" class="text-danger fw-bold"></td>
+                <td id="lblNormalPrice"></td><td id="lblPromoPrice" class="text-success fw-bold"></td><td id="lblStartDate"></td><td id="lblEndDate"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="row align-items-center bg-light p-3 border mt-3 rounded">
+          <div class="col-md-4">
+            <label><b>ต้องการ (DU):</b></label>
+            <input type="number" id="duInput" class="form-control form-control-lg text-center" min="1" placeholder="ใส่จำนวน DU" oninput="calculateTotal()">
+          </div>
+          <div class="col-md-4">
+            <label>จำนวนชิ้น/DU:</label><input type="text" id="duSize" class="form-control text-center" readonly>
+          </div>
+          <div class="col-md-4 text-center mt-3 mt-md-0 text-danger bg-white p-2 rounded border">
+            <label><b>รวมจำนวนสั่ง (ชิ้น)</b></label><h2 id="totalPieces" class="mb-0">0</h2>
+          </div>
+        </div>
+        <button class="btn btn-success btn-lg w-100 mt-4" onclick="saveOrder()">บันทึกและส่งเข้า Email</button>
+      </div>
+    </div>
+
+    <div class="card p-4 text-center bg-dark text-white">
+      <h4>โหมด ADMIN</h4>
+      <button class="btn btn-warning w-50 mx-auto" onclick="adminExport()">ดาวน์โหลด Excel</button>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------------------------------
+    // ใส่ URL ของคุณเรียบร้อยแล้ว
+    // -----------------------------------------------------
+    const API_URL = "https://script.google.com/macros/s/AKfycbzzyO5kApUa5Mdkc1KbCsM3h8fcOs9K4OmoeIbZd03k6Lz65ZMxIKez9QG0lKNQfI6g/exec"; 
+
+    let currentProduct = null;
+
+    function searchBarcode() {
+      const branch = document.getElementById('branchCode').value;
+      const barcode = document.getElementById('barcodeInput').value;
+      if(!branch) { alert('กรุณาระบุสาขาก่อนค้นหาสินค้า!'); return; }
+      if(!barcode) return;
+
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('loading').innerText = 'กำลังค้นหา...';
+      document.getElementById('productDetails').style.display = 'none';
+
+      // ยิงข้อมูลไปถาม GAS แบบ API
+      fetch(`${API_URL}?action=search&barcode=${barcode}`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('loading').style.display = 'none';
+          if(data) {
+            currentProduct = data;
+            document.getElementById('productDetails').style.display = 'block';
+            document.getElementById('lblBarcode').innerText = data.barcode;
+            document.getElementById('lblName').innerText = data.name;
+            document.getElementById('lblPromo').innerText = data.promoType;
+            document.getElementById('lblNormalPrice').innerText = data.normalPrice;
+            document.getElementById('lblPromoPrice').innerText = data.promoPrice;
+            document.getElementById('lblStartDate').innerText = new Date(data.startDate).toLocaleDateString('th-TH');
+            document.getElementById('lblEndDate').innerText = new Date(data.endDate).toLocaleDateString('th-TH');
+            document.getElementById('duSize').value = data.duSize;
+            document.getElementById('duInput').value = '';
+            document.getElementById('totalPieces').innerText = '0';
+          } else {
+            alert('ไม่พบบาร์โค้ดนี้ในระบบ');
+            document.getElementById('barcodeInput').value = '';
+          }
+        }).catch(err => alert("เกิดข้อผิดพลาดในการเชื่อมต่อ: " + err));
+    }
+
+    function calculateTotal() {
+      const du = document.getElementById('duInput').value;
+      const size = document.getElementById('duSize').value;
+      document.getElementById('totalPieces').innerText = (du * size) || 0;
+    }
+
+    function saveOrder() {
+      const branch = document.getElementById('branchCode').value;
+      const duQty = document.getElementById('duInput').value;
+      const totalQty = document.getElementById('totalPieces').innerText;
+
+      if(!duQty || duQty <= 0) { alert('กรุณาใส่จำนวน DU ที่ต้องการให้ถูกต้อง'); return; }
+
+      document.getElementById('loading').innerText = 'กำลังบันทึกและส่งเข้าอีเมล...';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('productDetails').style.display = 'none';
+
+      // แนบข้อมูลส่งไปแบบ GET
+      const params = new URLSearchParams({
+        action: 'save',
+        branch: branch,
+        duQty: duQty,
+        totalQty: totalQty,
+        p_barcode: currentProduct.barcode,
+        p_name: currentProduct.name,
+        p_normalPrice: currentProduct.normalPrice,
+        p_promoPrice: currentProduct.promoPrice,
+        p_startDate: currentProduct.startDate,
+        p_endDate: currentProduct.endDate
+      });
+
+      fetch(`${API_URL}?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+          alert(data.message);
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('barcodeInput').value = '';
+        }).catch(err => alert("เกิดข้อผิดพลาดในการบันทึก: " + err));
+    }
+
+    function adminExport() {
+      document.getElementById('loading').innerText = 'กำลังเตรียมไฟล์ดาวน์โหลด...';
+      document.getElementById('loading').style.display = 'block';
+      fetch(`${API_URL}?action=export`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('loading').style.display = 'none';
+          window.open(data.url, '_blank');
+        });
+    }
+  </script>
+</body>
+</html>
