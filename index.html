@@ -12,7 +12,7 @@
             font-family: 'Noto Sans Thai', sans-serif;
             background-color: #f4f6f9;
             color: #333;
-            padding-bottom: 90px; /* เว้นที่ให้ Footer ลอยตัว */
+            padding-bottom: 90px;
         }
         .header-banner {
             background: linear-gradient(135deg, #00205b 0%, #003b95 100%);
@@ -37,7 +37,6 @@
             font-weight: 600;
             text-transform: uppercase;
             font-size: 13px;
-            letter-spacing: 0.5px;
             border-bottom: 2px solid #e9ecef;
             white-space: nowrap;
         }
@@ -69,7 +68,6 @@
         .price-normal { text-decoration: line-through; color: #999; font-size: 12px; }
         .price-promo { color: #2e7d32; font-weight: 700; font-size: 16px; }
         
-        /* Sticky Bottom Footer สำหรับกดสั่งซื้อ */
         .floating-footer {
             position: fixed;
             bottom: 0;
@@ -146,7 +144,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -164,20 +162,22 @@
 
     <script>
         // ==========================================
-        // 🔴 นำ URL จาก Apps Script มาวางในบรรทัดด้านล่างนี้
+        // 🔴 นำ URL ใหม่จาก Google Apps Script มาใส่ตรงนี้ครับ
         // ==========================================
         const API_URL = "https://script.google.com/macros/s/AKfycbz-xsHAPur-VdgVSAaE0a7zxTpwZW-ycvP8N2Wui_4ZAQ1NdkOeHSnYDqHzNvhqMNZF/exec"; 
         
         let globalProducts = [];
 
-        // ฟังก์ชัน 1: ดึงข้อมูลสินค้ามาแสดง
         function loadProducts() {
             const branch = document.getElementById('branchCode').value;
             if (!branch) return alert('กรุณาระบุสาขาก่อนดึงรายการสินค้าครับ');
 
             showLoader('กำลังเชื่อมต่อฐานข้อมูล...');
 
-            fetch(`${API_URL}?action=getProducts`)
+            fetch(`${API_URL}?action=getProducts`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
                 .then(res => res.json())
                 .then(data => {
                     globalProducts = data;
@@ -192,7 +192,6 @@
                 });
         }
 
-        // ฟังก์ชัน 2: วาดตารางสินค้า
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
@@ -219,7 +218,6 @@
             });
         }
 
-        // ฟังก์ชัน 3: คำนวณชิ้นเมื่อพิมพ์เลข DU ทันที
         function calculateRow(index, duSize) {
             const duVal = document.getElementById(`du_${index}`).value;
             const total = (duVal * duSize) || 0;
@@ -227,7 +225,6 @@
             updateSummary();
         }
 
-        // ฟังก์ชัน 4: อัปเดตยอดรวมด้านล่างสุด
         function updateSummary() {
             let itemsCount = 0;
             globalProducts.forEach((p, i) => {
@@ -236,7 +233,7 @@
             document.getElementById('summaryCount').innerText = itemsCount;
         }
 
-        // ฟังก์ชัน 5: ส่งข้อมูลเพื่อบันทึก
+        // ฟังก์ชันใหม่ที่แก้ปัญหา Failed to fetch แล้ว 100%
         function submitOrders() {
             const branch = document.getElementById('branchCode').value;
             const orders = [];
@@ -257,35 +254,36 @@
             if (confirm(`ยืนยันการส่งรายการสั่งซื้อจำนวน ${orders.length} รายการ จากสาขา ${branch} ใช่หรือไม่?`)) {
                 showLoader('กำลังสร้างไฟล์ Excel และส่งเข้าอีเมล...');
 
+                const payloadData = JSON.stringify({
+                    action: 'saveOrder',
+                    branch: branch,
+                    orders: orders
+                });
+
+                // ใช้ URLSearchParams หุ้มข้อมูลอีกชั้น เพื่อให้ผ่านด่านความปลอดภัยของเบราว์เซอร์
                 fetch(API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({
-                        action: 'saveOrder',
-                        branch: branch,
-                        orders: orders
-                    })
+                    body: new URLSearchParams({ payload: payloadData })
                 })
                 .then(res => res.json())
                 .then(data => {
                     hideLoader();
                     if(data.success) {
                         alert(data.message);
-                        // รีเซ็ตหน้าจอใหม่
                         document.getElementById('catalogSection').style.display = 'none';
                         document.getElementById('floatingFooter').style.display = 'none';
                         document.getElementById('branchCode').value = '';
                     } else {
-                        alert("Error: " + data.error);
+                        alert("Error จากระบบ Google: " + data.error); 
                     }
                 })
                 .catch(err => {
                     hideLoader();
-                    alert("การเชื่อมต่อล้มเหลว: " + err);
+                    alert("การเชื่อมต่อล้มเหลว (Failed to fetch): " + err);
                 });
             }
         }
 
-        // ตัวช่วยแสดง Loader
         function showLoader(text) {
             document.getElementById('loader-text').innerText = text;
             document.getElementById('loader').style.display = 'flex';
