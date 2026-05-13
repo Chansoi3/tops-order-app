@@ -3,343 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tops Ordering Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>ระบบสั่งสินค้าโปรโมชั่น</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root {
-            --primary: #004d40;
-            --secondary: #00796b;
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-dark: #333333;
-            --border: #e0e0e0;
-        }
-
         body {
-            font-family: 'Kanit', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 20px;
-            color: var(--text-dark);
+            font-family: 'Noto Sans Thai', sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            padding-bottom: 90px; /* เว้นที่ให้ Footer ลอยตัว */
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: var(--card-bg);
+        .header-banner {
+            background: linear-gradient(135deg, #00205b 0%, #003b95 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .card-custom {
+            background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: none;
+            margin-bottom: 20px;
+        }
+        .table-responsive {
+            border-radius: 12px;
             overflow: hidden;
         }
-
-        .header {
-            background-color: var(--primary);
-            color: white;
-            padding: 20px 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        .control-panel {
-            padding: 20px 30px;
-            background-color: #fafafa;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .form-group {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        input[type="text"], input[type="number"], select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-family: inherit;
-            box-sizing: border-box;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-family: inherit;
+        .table thead th {
+            background-color: #f8f9fa;
+            color: #555;
             font-weight: 600;
-            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e9ecef;
+            white-space: nowrap;
+        }
+        .table tbody td {
+            vertical-align: middle;
+            font-size: 14px;
+        }
+        .input-du {
+            width: 80px;
+            text-align: center;
+            font-weight: bold;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
             transition: 0.3s;
         }
-
-        .btn-primary { background-color: var(--secondary); color: white; }
-        .btn-primary:hover { background-color: var(--primary); }
-        .btn-success { background-color: #2e7d32; color: white; width: 100%; font-size: 18px; padding: 15px;}
-        .btn-success:hover { background-color: #1b5e20; }
-        .btn-warning { background-color: #f57f17; color: white; }
-
-        .table-responsive {
-            overflow-x: auto;
-            padding: 0 30px 20px 30px;
+        .input-du:focus {
+            border-color: #00205b;
+            box-shadow: none;
+            outline: none;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        th {
-            background-color: var(--primary);
-            color: white;
-            position: sticky;
-            top: 0;
-        }
-
-        .promo-badge {
+        .badge-promo {
             background-color: #ffebee;
-            color: #c62828;
-            padding: 4px 8px;
-            border-radius: 4px;
+            color: #d32f2f;
+            padding: 5px 10px;
+            border-radius: 20px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
         }
-
-        .du-input {
-            width: 80px !important;
-            text-align: center;
-            border: 2px solid var(--secondary) !important;
+        .price-normal { text-decoration: line-through; color: #999; font-size: 12px; }
+        .price-promo { color: #2e7d32; font-weight: 700; font-size: 16px; }
+        
+        /* Sticky Bottom Footer สำหรับกดสั่งซื้อ */
+        .floating-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
         }
-
-        .total-col {
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 16px;
-        }
-
-        .footer-panel {
-            padding: 20px 30px;
-            background-color: #fafafa;
-            border-top: 1px solid var(--border);
-        }
-
-        #loading {
-            text-align: center;
-            padding: 20px;
-            font-weight: bold;
-            color: var(--secondary);
-            display: none;
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9); z-index: 2000;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>ระบบสั่งสินค้าโปรโมชั่น (Tops)</h1>
+    <div class="loader-overlay" id="loader">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+        <h5 class="mt-3" id="loader-text">กำลังประมวลผล...</h5>
     </div>
 
-    <div class="control-panel">
-        <div class="form-group">
-            <label>1. เลือกรหัสสาขา</label>
-            <input list="branchOptions" id="branchCode" placeholder="พิมพ์รหัสหรือชื่อสาขาเพื่อเลือก...">
-            <datalist id="branchOptions">
-                <option value="730 - Piean - Pin 2">
-                <option value="5209 - Soi Kusolsin">
-                <option value="5219 - Chaloem Prakiat 30 Yaek 14">
-                <option value="5285 - F.Thaghanrue Bangna">
-                <option value="5291 - Bantheparak">
-                <option value="3100 - Chaloem Phrakiat 14 Yaek 34">
-                <option value="3108 - Supapong3Yaek4">
-                <option value="3109 - Soi Onnut 36">
-                <option value="3110 - Bnangna-Trad Km 6.5 Gas Station">
-                <option value="3118 - Soi Thepharak 8">
-                <option value="3121 - Bangna - Trad Km.8 Gas Station">
-                <option value="6953 - Tops daily Bangchak Bangna Trad K.M.7">
-                <option value="6731 - Tops daily Caltex Srinakarin">
-            </datalist>
-        </div>
-        <div class="form-group" style="flex: 0;">
-            <label>&nbsp;</label>
-            <button class="btn btn-primary" onclick="loadProducts()">โหลดรายการสินค้าทั้งหมด</button>
+    <div class="header-banner mb-4">
+        <div class="container text-center">
+            <h2 class="mb-0 fw-bold">ระบบสั่งสินค้าโปรโมชั่น</h2>
+            <p class="mb-0 opacity-75">Tops Professional Order System</p>
         </div>
     </div>
 
-    <div id="loading">กำลังโหลดข้อมูล กรุณารอสักครู่...</div>
-
-    <div class="table-responsive">
-        <table id="productTable" style="display:none;">
-            <thead>
-                <tr>
-                    <th>บาร์โค้ด</th>
-                    <th>ชื่อรายการสินค้า</th>
-                    <th>โปรโมชั่น</th>
-                    <th>ราคา</th>
-                    <th>สั่ง (DU)</th>
-                    <th>รวม (ชิ้น)</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                </tbody>
-        </table>
-    </div>
-
-    <div class="footer-panel" id="footerPanel" style="display:none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <div style="font-size: 18px; font-weight: bold;">รวมรายการที่สั่ง: <span id="totalItemsBadge" style="color:red;">0</span> รายการ</div>
-            <button class="btn btn-warning" onclick="window.open('https://docs.google.com/spreadsheets/d/10ikBHPlkfHpWtCKy3YBo77YCqzQUXOLHsT8VaPJB8Mk/edit', '_blank')">เข้าโหมด Admin</button>
+    <div class="container">
+        <div class="card card-custom p-4">
+            <div class="row align-items-end">
+                <div class="col-md-8 mb-3 mb-md-0">
+                    <label class="form-label fw-bold text-primary">1. เลือกรหัสหรือชื่อสาขา</label>
+                    <input class="form-control form-control-lg" list="branchOptions" id="branchCode" placeholder="คลิกเพื่อเลือกสาขา..." required>
+                    <datalist id="branchOptions">
+                        <option value="730 - Piean - Pin 2">
+                        <option value="5209 - Soi Kusolsin">
+                        <option value="5219 - Chaloem Prakiat 30 Yaek 14">
+                        <option value="5285 - F.Thaghanrue Bangna">
+                        <option value="5291 - Bantheparak">
+                        <option value="3100 - Chaloem Phrakiat 14 Yaek 34">
+                        <option value="3108 - Supapong3Yaek4">
+                        <option value="3109 - Soi Onnut 36">
+                        <option value="3110 - Bnangna-Trad Km 6.5 Gas Station">
+                        <option value="3118 - Soi Thepharak 8">
+                        <option value="3121 - Bangna - Trad Km.8 Gas Station">
+                        <option value="6953 - Tops daily Bangchak Bangna Trad K.M.7">
+                        <option value="6731 - Tops daily Caltex Srinakarin">
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="loadProducts()">
+                        ดึงรายการสินค้า
+                    </button>
+                </div>
+            </div>
         </div>
-        <button class="btn btn-success" onclick="submitOrders()">บันทึกรายการสั่งซื้อและส่งเข้า Email</button>
+
+        <div class="card card-custom p-0" id="catalogSection" style="display: none;">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">รายละเอียดสินค้า</th>
+                            <th class="text-center">ราคาปกติ / โปร</th>
+                            <th class="text-center">ระบุจำนวน (DU)</th>
+                            <th class="text-end pe-4">รวม (ชิ้น)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    // URL ที่ได้จาก Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbzzyO5kApUa5Mdkc1KbCsM3h8fcOs9K4OmoeIbZd03k6Lz65ZMxIKez9QG0lKNQfI6g/exec";
-    
-    let globalProducts = [];
+    <div class="floating-footer" id="floatingFooter" style="display: none;">
+        <div>
+            <div class="text-muted" style="font-size: 12px;">รวมรายการสั่งซื้อ</div>
+            <h4 class="mb-0 fw-bold text-primary"><span id="summaryCount">0</span> <small class="fs-6">รายการ</small></h4>
+        </div>
+        <button class="btn btn-success btn-lg fw-bold px-4 shadow-sm" onclick="submitOrders()">
+            ส่งใบสั่งซื้อเข้าอีเมล
+        </button>
+    </div>
 
-    function loadProducts() {
-        const branch = document.getElementById('branchCode').value;
-        if (!branch) {
-            alert('กรุณาเลือกสาขาก่อนโหลดรายการสินค้า');
-            return;
+    <script>
+        // ==========================================
+        // 🔴 นำ URL จาก Apps Script มาวางในบรรทัดด้านล่างนี้
+        // ==========================================
+        const API_URL = "https://script.google.com/macros/s/AKfycb.../exec"; 
+        
+        let globalProducts = [];
+
+        // ฟังก์ชัน 1: ดึงข้อมูลสินค้ามาแสดง
+        function loadProducts() {
+            const branch = document.getElementById('branchCode').value;
+            if (!branch) return alert('กรุณาระบุสาขาก่อนดึงรายการสินค้าครับ');
+
+            showLoader('กำลังเชื่อมต่อฐานข้อมูล...');
+
+            fetch(`${API_URL}?action=getProducts`)
+                .then(res => res.json())
+                .then(data => {
+                    globalProducts = data;
+                    renderTable();
+                    hideLoader();
+                    document.getElementById('catalogSection').style.display = 'block';
+                    document.getElementById('floatingFooter').style.display = 'flex';
+                })
+                .catch(err => {
+                    hideLoader();
+                    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err);
+                });
         }
 
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('productTable').style.display = 'none';
-        document.getElementById('footerPanel').style.display = 'none';
+        // ฟังก์ชัน 2: วาดตารางสินค้า
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
 
-        fetch(`${API_URL}?action=getList`)
-            .then(response => response.json())
-            .then(data => {
-                globalProducts = data;
-                renderTable();
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('productTable').style.display = 'table';
-                document.getElementById('footerPanel').style.display = 'block';
-            })
-            .catch(err => {
-                alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err);
-                document.getElementById('loading').style.display = 'none';
+            globalProducts.forEach((p, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="ps-4">
+                        <div class="fw-bold text-dark">${p.name}</div>
+                        <div class="text-muted" style="font-size: 12px;">บาร์โค้ด: ${p.barcode} | ${p.group}</div>
+                        <span class="badge-promo mt-1 d-inline-block">${p.promoType}</span>
+                    </td>
+                    <td class="text-center">
+                        <div class="price-normal">฿${p.normalPrice}</div>
+                        <div class="price-promo">฿${p.promoPrice}</div>
+                    </td>
+                    <td class="text-center">
+                        <input type="number" class="form-control input-du mx-auto" id="du_${index}" min="0" placeholder="0" oninput="calculateRow(${index}, ${p.duSize})">
+                        <div class="text-muted mt-1" style="font-size: 11px;">(${p.duSize} ชิ้น/DU)</div>
+                    </td>
+                    <td class="text-end pe-4 fw-bold fs-5 text-primary align-middle" id="total_${index}">0</td>
+                `;
+                tbody.appendChild(tr);
             });
-    }
+        }
 
-    function renderTable() {
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
+        // ฟังก์ชัน 3: คำนวณชิ้นเมื่อพิมพ์เลข DU ทันที
+        function calculateRow(index, duSize) {
+            const duVal = document.getElementById(`du_${index}`).value;
+            const total = (duVal * duSize) || 0;
+            document.getElementById(`total_${index}`).innerText = total;
+            updateSummary();
+        }
 
-        globalProducts.forEach((product, index) => {
-            const tr = document.createElement('tr');
-            
-            // Format Dates
-            const startD = new Date(product.startDate).toLocaleDateString('th-TH');
-            const endD = new Date(product.endDate).toLocaleDateString('th-TH');
+        // ฟังก์ชัน 4: อัปเดตยอดรวมด้านล่างสุด
+        function updateSummary() {
+            let itemsCount = 0;
+            globalProducts.forEach((p, i) => {
+                if (document.getElementById(`du_${i}`).value > 0) itemsCount++;
+            });
+            document.getElementById('summaryCount').innerText = itemsCount;
+        }
 
-            tr.innerHTML = `
-                <td>${product.barcode}</td>
-                <td>
-                    <strong>${product.name}</strong><br>
-                    <span style="font-size:12px; color:#666;">ระยะเวลา: ${startD} - ${endD}</span>
-                </td>
-                <td><span class="promo-badge">${product.promoType}</span></td>
-                <td>
-                    <span style="text-decoration:line-through; font-size:12px;">฿${product.normalPrice}</span><br>
-                    <strong style="color:var(--secondary);">฿${product.promoPrice}</strong>
-                </td>
-                <td>
-                    <input type="number" class="du-input" id="du_${index}" min="0" placeholder="0" oninput="calculateRow(${index}, ${product.duSize})">
-                    <div style="font-size:10px; color:#666; margin-top:3px;">(${product.duSize} ชิ้น/DU)</div>
-                </td>
-                <td class="total-col" id="total_${index}">0</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+        // ฟังก์ชัน 5: ส่งข้อมูลเพื่อบันทึก
+        function submitOrders() {
+            const branch = document.getElementById('branchCode').value;
+            const orders = [];
 
-    function calculateRow(index, duSize) {
-        const duValue = document.getElementById(`du_${index}`).value;
-        const totalPieces = (duValue * duSize) || 0;
-        document.getElementById(`total_${index}`).innerText = totalPieces;
-        
-        // อัปเดตจำนวนรายการทั้งหมดที่สั่ง
-        updateTotalBadge();
-    }
+            globalProducts.forEach((p, i) => {
+                const duQty = document.getElementById(`du_${i}`).value;
+                if (duQty > 0) {
+                    orders.push({
+                        product: p,
+                        duQty: duQty,
+                        totalQty: document.getElementById(`total_${i}`).innerText
+                    });
+                }
+            });
 
-    function updateTotalBadge() {
-        let count = 0;
-        globalProducts.forEach((p, index) => {
-            const duValue = document.getElementById(`du_${index}`).value;
-            if (duValue > 0) count++;
-        });
-        document.getElementById('totalItemsBadge').innerText = count;
-    }
+            if (orders.length === 0) return alert('กรุณาระบุจำนวนสินค้าที่ต้องการสั่งอย่างน้อย 1 รายการ');
 
-    function submitOrders() {
-        const branch = document.getElementById('branchCode').value;
-        const ordersToSubmit = [];
+            if (confirm(`ยืนยันการส่งรายการสั่งซื้อจำนวน ${orders.length} รายการ จากสาขา ${branch} ใช่หรือไม่?`)) {
+                showLoader('กำลังสร้างไฟล์ Excel และส่งเข้าอีเมล...');
 
-        globalProducts.forEach((product, index) => {
-            const duQty = document.getElementById(`du_${index}`).value;
-            if (duQty > 0) {
-                ordersToSubmit.push({
-                    product: product,
-                    duQty: duQty,
-                    totalQty: document.getElementById(`total_${index}`).innerText
+                fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'saveOrder',
+                        branch: branch,
+                        orders: orders
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    hideLoader();
+                    if(data.success) {
+                        alert(data.message);
+                        // รีเซ็ตหน้าจอใหม่
+                        document.getElementById('catalogSection').style.display = 'none';
+                        document.getElementById('floatingFooter').style.display = 'none';
+                        document.getElementById('branchCode').value = '';
+                    } else {
+                        alert("Error: " + data.error);
+                    }
+                })
+                .catch(err => {
+                    hideLoader();
+                    alert("การเชื่อมต่อล้มเหลว: " + err);
                 });
             }
-        });
-
-        if (ordersToSubmit.length === 0) {
-            alert('คุณยังไม่ได้ระบุจำนวน DU ในสินค้าใดเลย');
-            return;
         }
 
-        if (confirm(`คุณต้องการยืนยันการสั่งซื้อจำนวน ${ordersToSubmit.length} รายการ ใช่หรือไม่?`)) {
-            document.getElementById('loading').innerText = 'กำลังบันทึกข้อมูลและจัดส่งอีเมล...';
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('productTable').style.display = 'none';
-            document.getElementById('footerPanel').style.display = 'none';
-
-            // ส่งข้อมูลแบบ POST
-            fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'save',
-                    branch: branch,
-                    orders: ordersToSubmit
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                document.getElementById('loading').style.display = 'none';
-                // รีเซ็ตหน้าจอ
-                document.getElementById('branchCode').value = '';
-                document.getElementById('tableBody').innerHTML = '';
-            })
-            .catch(err => alert("เกิดข้อผิดพลาดในการบันทึก: " + err));
+        // ตัวช่วยแสดง Loader
+        function showLoader(text) {
+            document.getElementById('loader-text').innerText = text;
+            document.getElementById('loader').style.display = 'flex';
         }
-    }
-</script>
-
+        function hideLoader() {
+            document.getElementById('loader').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
