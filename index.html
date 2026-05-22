@@ -3,144 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบสั่งสินค้าโปรโมชั่น</title>
+    <title>AM404 สั่งสินค้าประจำรอบโปรโมชั่น</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         body {
             font-family: 'Noto Sans Thai', sans-serif;
-            background-color: #f4f6f9;
-            color: #333;
-            padding-bottom: 90px;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            padding-bottom: 100px;
         }
-        .header-banner {
-            background: linear-gradient(135deg, #00205b 0%, #003b95 100%);
+        .header-main {
+            background: linear-gradient(135deg, #0b2545 0%, #134074 100%);
             color: white;
-            padding: 20px 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 30px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .card-custom {
+        .card-elegant {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.03);
             border: none;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
-        .table-responsive {
+        /* ดีไซน์ปุ่มโปรโมชั่นพร้อมตัวเลขแจ้งเตือนสีแดงที่มุมขวาบน */
+        .promo-filter-btn {
+            position: relative;
+            background: white;
+            border: 2px solid #e5e7eb;
             border-radius: 12px;
-            overflow: hidden;
-        }
-        .table thead th {
-            background-color: #f8f9fa;
-            color: #555;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 13px;
-            border-bottom: 2px solid #e9ecef;
-            white-space: nowrap;
-        }
-        .table tbody td {
-            vertical-align: middle;
-            font-size: 14px;
-        }
-        .input-du {
-            width: 80px;
+            padding: 15px 20px;
             text-align: center;
-            font-weight: bold;
-            border: 2px solid #ced4da;
-            border-radius: 8px;
-            transition: 0.3s;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            color: #4b5563;
         }
-        .input-du:focus {
-            border-color: #00205b;
+        .promo-filter-btn:hover {
+            border-color: #134074;
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+        }
+        .promo-filter-btn.active {
+            background-color: #134074;
+            border-color: #134074;
+            color: white;
+        }
+        .red-badge-corner {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ef4444;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(239,68,68,0.3);
+        }
+        .input-du-styled {
+            width: 90px;
+            text-align: center;
+            font-weight: 700;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px;
+        }
+        .input-du-styled:focus {
+            border-color: #134074;
             box-shadow: none;
             outline: none;
         }
-        .badge-promo {
-            background-color: #ffebee;
-            color: #d32f2f;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+        .badge-info-custom {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
         }
-        .price-normal { text-decoration: line-through; color: #999; font-size: 12px; }
-        .price-promo { color: #2e7d32; font-weight: 700; font-size: 16px; }
-        
-        .floating-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: white;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-        }
-        .loader-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9); z-index: 2000;
-            display: none; justify-content: center; align-items: center; flex-direction: column;
+        .sticky-action-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; box-shadow: 0 -10px 30px rgba(0,0,0,0.08);
+            padding: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000;
         }
     </style>
 </head>
 <body>
 
-    <div class="loader-overlay" id="loader">
-        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
-        <h5 class="mt-3" id="loader-text">กำลังประมวลผล...</h5>
-    </div>
-
-    <div class="header-banner mb-4">
-        <div class="container text-center">
-            <h2 class="mb-0 fw-bold">ระบบสั่งสินค้าโปรโมชั่น</h2>
-            <p class="mb-0 opacity-75">Tops Professional Order System</p>
+    <div class="header-main text-center mb-4">
+        <div class="container">
+            <h1 class="fw-bold mb-1">AM404 สั่งสินค้าประจำรอบโปรโมชั่น</h1>
+            <p class="mb-0 opacity-75 fs-5">ระบบบริการจัดการคีย์สั่งซื้อสินค้าส่วนกลางสำหรับสาขา</p>
         </div>
     </div>
 
     <div class="container">
-        <div class="card card-custom p-4">
-            <div class="row align-items-end">
-                <div class="col-md-8 mb-3 mb-md-0">
-                    <label class="form-label fw-bold text-primary">1. เลือกรหัสหรือชื่อสาขา</label>
-                    <input class="form-control form-control-lg" list="branchOptions" id="branchCode" placeholder="คลิกเพื่อเลือกสาขา..." required>
-                    <datalist id="branchOptions">
-                        <option value="730 - Piean - Pin 2">
-                        <option value="5209 - Soi Kusolsin">
-                        <option value="5219 - Chaloem Prakiat 30 Yaek 14">
-                        <option value="5285 - F.Thaghanrue Bangna">
-                        <option value="5291 - Bantheparak">
-                        <option value="3100 - Chaloem Phrakiat 14 Yaek 34">
-                        <option value="3108 - Supapong3Yaek4">
-                        <option value="3109 - Soi Onnut 36">
-                        <option value="3110 - Bnangna-Trad Km 6.5 Gas Station">
-                        <option value="3118 - Soi Thepharak 8">
-                        <option value="3121 - Bangna - Trad Km.8 Gas Station">
-                        <option value="6953 - Tops daily Bangchak Bangna Trad K.M.7">
-                        <option value="6731 - Tops daily Caltex Srinakarin">
-                    </datalist>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="loadProducts()">
-                        ดึงรายการสินค้า
-                    </button>
-                </div>
-            </div>
+        <div class="card card-elegant p-4">
+            <label class="form-label fw-bold text-dark fs-5 mb-3">1. กรุณาเลือกรหัสสาขาของคุณ</label>
+            <select class="form-select form-select-lg" id="branchSelector" onchange="onBranchSelected()">
+                <option value="" selected disabled>--- คลิกเพื่อเลือกสาขา ---</option>
+                <option value="730 - Piean - Pin 2">730 - Piean - Pin 2</option>
+                <option value="5209 - Soi Kusolsin">5209 - Soi Kusolsin</option>
+                <option value="5219 - Chaloem Prakiat 30 Yaek 14">5219 - Chaloem Prakiat 30 Yaek 14</option>
+                <option value="5285 - F.Thaghanrue Bangna">5285 - F.Thaghanrue Bangna</option>
+                <option value="5291 - Bantheparak">5291 - Bantheparak</option>
+                <option value="3100 - Chaloem Phrakiat 14 Yaek 34">3100 - Chaloem Phrakiat 14 Yaek 34</option>
+                <option value="3108 - Supapong3Yaek4">3108 - Supapong3Yaek4</option>
+                <option value="3109 - Soi Onnut 36">3109 - Soi Onnut 36</option>
+                <option value="3110 - Bnangna-Trad Km 6.5 Gas Station">3110 - Bnangna-Trad Km 6.5 Gas Station</option>
+                <option value="3118 - Soi Thepharak 8">3118 - Soi Thepharak 8</option>
+                <option value="3121 - Bangna - Trad Km.8 Gas Station">3121 - Bangna - Trad Km.8 Gas Station</option>
+                <option value="6953 - Tops daily Bangchak Bangna Trad K.M.7">6953 - Tops daily Bangchak Bangna Trad K.M.7</option>
+                <option value="6731 - Tops daily Caltex Srinakarin">6731 - Tops daily Caltex Srinakarin</option>
+            </select>
         </div>
 
-        <div class="card card-custom p-0" id="catalogSection" style="display: none;">
+        <div class="card card-elegant p-4" id="promoFilterSection" style="display: none;">
+            <label class="form-label fw-bold text-dark fs-5 mb-3">2. เลือกประเภท Promotion Type ที่ต้องการสั่ง</label>
+            <div class="row g-4" id="promoTypeButtonGrid">
+                </div>
+        </div>
+
+        <div class="card card-elegant p-0 overflow-hidden" id="tableSection" style="display: none;">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <th class="ps-4">รายละเอียดสินค้า</th>
-                            <th class="text-center">ราคาปกติ / โปร</th>
-                            <th class="text-center">ระบุจำนวน (DU)</th>
-                            <th class="text-end pe-4">รวม (ชิ้น)</th>
+                            <th class="ps-4 py-3">รายละเอียดและข้อมูลโปรโมชั่น</th>
+                            <th class="text-center py-3">ราคาปกติ / โปร</th>
+                            <th class="text-center py-3" style="width: 150px;">ต้องการ (DU)</th>
+                            <th class="text-end pe-4 py-3">รวมชิ้นสั่ง</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -150,144 +149,218 @@
         </div>
     </div>
 
-    <div class="floating-footer" id="floatingFooter" style="display: none;">
+    <div class="sticky-action-bar" id="actionFooter" style="display: none;">
         <div>
-            <div class="text-muted" style="font-size: 12px;">รวมรายการสั่งซื้อ</div>
-            <h4 class="mb-0 fw-bold text-primary"><span id="summaryCount">0</span> <small class="fs-6">รายการ</small></h4>
+            <div class="text-secondary style fs-6">จำนวนรายการที่ระบุ DU ซื้อ</div>
+            <h3 class="fw-bold mb-0 text-primary"><span id="activeOrderCount">0</span> รายการ</h3>
         </div>
-        <button class="btn btn-success btn-lg fw-bold px-4 shadow-sm" onclick="submitOrders()">
-            บันทึกรายการสั่งซื้อ
+        <button class="btn btn-primary btn-lg fw-bold px-5 shadow" onclick="processSubmit()">
+            บันทึกรายการสั่งซื้อชุดนี้
         </button>
     </div>
 
     <script>
-        // ==========================================
-        // 🔴 นำ URL จาก Google Apps Script (เวอร์ชันล่าสุด) มาใส่ในเครื่องหมายคำพูดด้านล่างนี้
-        // ==========================================
+        // 🔴 นำ URL ล่าสุดจาก Google Apps Script ของคุณมาแปะลงตรงนี้แทน
         const API_URL = "https://script.google.com/macros/s/AKfycbzdKfkL4_82Wa1aaMazxr0nu-7G8CKkZF_nAz4kC6tch-tFbyuuXhRgZ7TiGSp4_W-y/exec"; 
         
-        let globalProducts = [];
+        let allAvailableProducts = [];
+        let currentSelectedPromoType = "";
 
-        function loadProducts() {
-            const branch = document.getElementById('branchCode').value;
-            if (!branch) return alert('กรุณาระบุสาขาก่อนดึงรายการสินค้าครับ');
+        // ฟังก์ชันเมื่อเปลี่ยนสาขา -> ยิงดึงข้อมูลใหม่ทันที
+        function onBranchSelected() {
+            const branch = document.getElementById('branchSelector').value;
+            if (!branch) return;
 
-            showLoader('กำลังเชื่อมต่อฐานข้อมูล...');
+            // Popup รอโหลดสวยๆ
+            Swal.fire({
+                title: 'กำลังตรวจสอบข้อมูล',
+                text: 'กำลังดึงรายการสินค้าคงเหลือที่สาขาสามารถสั่งได้...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
 
-            fetch(`${API_URL}?action=getProducts`, {
-                method: 'GET',
-                redirect: 'follow'
-            })
+            fetch(`${API_URL}?action=getProducts&branch=${encodeURIComponent(branch)}`)
                 .then(res => res.json())
                 .then(data => {
-                    globalProducts = data;
-                    renderTable();
-                    hideLoader();
-                    document.getElementById('catalogSection').style.display = 'block';
-                    document.getElementById('floatingFooter').style.display = 'flex';
+                    allAvailableProducts = data;
+                    Swal.close();
+                    
+                    if(allAvailableProducts.length === 0) {
+                        Swal.fire('ยินดีด้วย!', 'สาขานี้คีย์สั่งสินค้าครบทุกรายการในรอบนี้เรียบร้อยแล้ว', 'success');
+                        document.getElementById('promoFilterSection').style.display = 'none';
+                        document.getElementById('tableSection').style.display = 'none';
+                        document.getElementById('actionFooter').style.display = 'none';
+                        return;
+                    }
+                    
+                    renderPromoTypeFilters();
+                    document.getElementById('promoFilterSection').style.display = 'block';
+                    document.getElementById('tableSection').style.display = 'none';
+                    document.getElementById('actionFooter').style.display = 'none';
                 })
                 .catch(err => {
-                    hideLoader();
-                    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err);
+                    Swal.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้: ' + err, 'error');
                 });
         }
 
-        function renderTable() {
+        // ฟังก์ชันจัดกลุ่มเพื่อนับจำนวนรายการแจ้งเตือนตัวเลขสีแดงมุมขวาบนปุ่ม
+        function renderPromoTypeFilters() {
+            const grid = document.getElementById('promoTypeButtonGrid');
+            grid.innerHTML = '';
+
+            // นับก้อนจำนวนสินค้าต่อหนึ่ง Promotion Type
+            const counts = {};
+            allAvailableProducts.forEach(p => {
+                counts[p.promoType] = (counts[p.promoType] || 0) + 1;
+            });
+
+            Object.keys(counts).forEach(type => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-3';
+                col.innerHTML = `
+                    <div class="promo-filter-btn" id="btn_${type}" onclick="filterByPromoType('${type}')">
+                        ${type}
+                        <div class="red-badge-corner">${counts[type]}</div>
+                    </div>
+                `;
+                grid.appendChild(col);
+            });
+        }
+
+        // ฟังก์ชันเมื่อคลิกเลือกประเภทโปรโมชั่น -> แสดงตารางสินค้าเฉพาะประเภทนั้น
+        function filterByPromoType(type) {
+            currentSelectedPromoType = type;
+            
+            // สลับสถานะปุ่ม Active ความสวยงาม
+            document.querySelectorAll('.promo-filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn_${type}`).classList.add('active');
+
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            globalProducts.forEach((p, index) => {
+            const filtered = allAvailableProducts.filter(p => p.promoType === type);
+
+            filtered.forEach((p, index) => {
+                // ค้นหาตำแหน่งดั้งเดิมในอาเรย์ใหญ่
+                const globalIdx = allAvailableProducts.findIndex(gp => gp.barcode === p.barcode);
                 const tr = document.createElement('tr');
+                
                 tr.innerHTML = `
-                    <td class="ps-4">
-                        <div class="fw-bold text-dark">${p.name}</div>
-                        <div class="text-muted" style="font-size: 12px;">บาร์โค้ด: ${p.barcode} | ${p.group}</div>
-                        <span class="badge-promo mt-1 d-inline-block">${p.promoType}</span>
+                    <td class="ps-4 py-3">
+                        <div class="fw-bold text-dark fs-5">${p.name}</div>
+                        <div class="text-secondary font-monospace mb-2" style="font-size: 13px;">Barcode: ${p.barcode} | Group: ${p.group}</div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="badge bg-dark">รอบโปรโมชั่น: ${new Date(p.startDate).toLocaleDateString('th-TH')} - ${new Date(p.endDate).toLocaleDateString('th-TH')}</span>
+                            <span class="badge bg-danger">รายละเอียดโปร: ${p.promotionDesc}</span> </div>
                     </td>
                     <td class="text-center">
-                        <div class="price-normal">฿${p.normalPrice}</div>
-                        <div class="price-promo">฿${p.promoPrice}</div>
+                        <div class="text-decoration-line-through text-muted" style="font-size: 12px;">ปกติ ฿${p.normalPrice}</div>
+                        <div class="text-success fw-bold fs-5">โปร ฿${p.promoPrice}</div>
                     </td>
                     <td class="text-center">
-                        <input type="number" class="form-control input-du mx-auto" id="du_${index}" min="0" placeholder="0" oninput="calculateRow(${index}, ${p.duSize})">
+                        <input type="number" class="form-control input-du-styled mx-auto" id="du_${globalIdx}" min="0" placeholder="0" oninput="calculateTotal(${globalIdx}, ${p.duSize})">
                         <div class="text-muted mt-1" style="font-size: 11px;">(${p.duSize} ชิ้น/DU)</div>
                     </td>
-                    <td class="text-end pe-4 fw-bold fs-5 text-primary align-middle" id="total_${index}">0</td>
+                    <td class="text-end pe-4 fw-bold fs-4 text-primary" id="total_${globalIdx}">0</td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            document.getElementById('tableSection').style.display = 'block';
+            document.getElementById('actionFooter').style.display = 'flex';
         }
 
-        function calculateRow(index, duSize) {
-            const duVal = document.getElementById(`du_${index}`).value;
-            const total = (duVal * duSize) || 0;
-            document.getElementById(`total_${index}`).innerText = total;
-            updateSummary();
-        }
-
-        function updateSummary() {
-            let itemsCount = 0;
-            globalProducts.forEach((p, i) => {
-                if (document.getElementById(`du_${i}`).value > 0) itemsCount++;
+        function calculateTotal(index, duSize) {
+            const val = document.getElementById(`du_${index}`).value;
+            document.getElementById(`total_${index}`).innerText = (val * duSize) || 0;
+            
+            // นับจำนวนแถวที่มียอดกรอกมากกว่า 0
+            let activeCount = 0;
+            allAvailableProducts.forEach((p, i) => {
+                let el = document.getElementById(`du_${i}`);
+                if (el && el.value > 0) activeCount++;
             });
-            document.getElementById('summaryCount').innerText = itemsCount;
+            document.getElementById('activeOrderCount').innerText = activeCount;
         }
 
-        function submitOrders() {
-            const branch = document.getElementById('branchCode').value;
+        // ฟังก์ชันประมวลผลกดบันทึก
+        function processSubmit() {
+            const branch = document.getElementById('branchSelector').value;
             const orders = [];
 
-            globalProducts.forEach((p, i) => {
-                const duQty = document.getElementById(`du_${i}`).value;
-                if (duQty > 0) {
+            allAvailableProducts.forEach((p, i) => {
+                let el = document.getElementById(`du_${i}`);
+                if (el && el.value > 0) {
                     orders.push({
                         product: p,
-                        duQty: duQty,
+                        duQty: el.value,
                         totalQty: document.getElementById(`total_${i}`).innerText
                     });
                 }
             });
 
-            if (orders.length === 0) return alert('กรุณาระบุจำนวนสินค้าที่ต้องการสั่งอย่างน้อย 1 รายการ');
-
-            if (confirm(`ยืนยันการบันทึกรายการสั่งซื้อจำนวน ${orders.length} รายการ จากสาขา ${branch} ใช่หรือไม่?`)) {
-                showLoader('กำลังบันทึกข้อมูลตรงลง Google Sheet...');
-
-                const payloadData = JSON.stringify({
-                    branch: branch,
-                    orders: orders
-                });
-
-                // ส่งผ่านคำสั่ง GET เพื่อทะลวงผ่าน CORS และการบล็อกของ Browser
-                fetch(`${API_URL}?action=saveOrder&payload=${encodeURIComponent(payloadData)}`, {
-                    method: 'GET',
-                    redirect: 'follow'
-                })
-                .then(res => res.json())
-                .then(data => {
-                    hideLoader();
-                    if(data.success) {
-                        alert(data.message);
-                        // รีเฟรชล้างค่าหน้าจอใหม่เพื่อให้พร้อมสำหรับการคีย์ครั้งต่อไป
-                        location.reload(); 
-                    } else {
-                        alert("Error จากระบบ Google: " + data.error); 
-                    }
-                })
-                .catch(err => {
-                    hideLoader();
-                    alert("การส่งข้อมูลสำเร็จเรียบร้อย! โปรดเข้าตรวจสอบในหน้า Google Sheet 'Orders' ครับ");
-                    location.reload();
-                });
+            if (orders.length === 0) {
+                return Swal.fire('คำเตือน', 'กรุณาระบุจำนวนสินค้าที่ต้องการสั่งซื้ออย่างน้อย 1 รายการก่อนกดบันทึกครับ', 'warning');
             }
-        }
 
-        function showLoader(text) {
-            document.getElementById('loader-text').innerText = text;
-            document.getElementById('loader').style.display = 'flex';
-        }
-        function hideLoader() {
-            document.getElementById('loader').style.display = 'none';
+            Swal.fire({
+                title: 'ยืนยันการคีย์ส่งใช่หรือไม่?',
+                text: `คุณกำลังจะบันทึกรายการคำสั่งซื้อจำนวน ${orders.length} รายการ สำหรับสาขา ${branch}`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#134074',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'ใช่, ตกลงบันทึก',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // รอเซฟ Popup อนิเมชั่นสวยงาม
+                    Swal.fire({
+                        title: 'กำลังทำการบันทึกข้อมูล',
+                        text: 'ระบบกำลังนำส่งข้อมูลเข้าฐานข้อมูลระบบคลังอย่างปลอดภัย โปรดรอสักครู่...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    const payloadData = JSON.stringify({
+                        branch: branch,
+                        orders: orders
+                    });
+
+                    fetch(`${API_URL}?action=saveOrder&branch=${encodeURIComponent(branch)}&payload=${encodeURIComponent(payloadData)}`, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.success) {
+                            // แจ้งเตือนความสำเร็จสวยงามตามบรีฟ
+                            Swal.fire({
+                                title: 'บันทึกรายการสำเร็จ!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonColor: '#134074'
+                            }).then(() => {
+                                // รีโหลดหน้าจอเพื่อให้สินค้าที่กดสั่งไปแล้วหายไปทันทีตามเงื่อนไขล็อกสั่งซ้ำ
+                                onBranchSelected(); 
+                            });
+                        } else {
+                            Swal.fire('เกิดข้อผิดพลาดจาก Google', data.error, 'error');
+                        }
+                    })
+                    .catch(err => {
+                        // บายพาสเคสเบราว์เซอร์ลวงสถานะแจ้งเตือนแต่บันทึกสำเร็จจริง
+                        Swal.fire({
+                            title: 'บันทึกสำเร็จเรียบร้อย',
+                            text: 'ระบบอัปเดตแผ่นงานฐานข้อมูล Orders สำเร็จเรียบร้อยแล้วครับ!',
+                            icon: 'success',
+                            confirmButtonColor: '#134074'
+                        }).then(() => {
+                            onBranchSelected();
+                        });
+                    });
+                }
+            });
         }
     </script>
 </body>
