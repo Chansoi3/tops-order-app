@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AM404 สั่งสินค้าโปรโมชั่น</title>
+    <title>AM404 สั่งสินค้าประจำรอบโปรโมชั่น</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -26,7 +26,7 @@
     <div class="header-main text-center mb-4">
         <div class="container">
             <h1 class="fw-bold mb-1">AM404 สั่งสินค้าประจำรอบโปรโมชั่น</h1>
-            <p class="mb-0 opacity-75 fs-5">ระบบบริการจัดการคีย์สั่งซื้อสินค้าสำหรับสาขา</p>
+            <p class="mb-0 opacity-75 fs-5">ระบบบริการจัดการคีย์สั่งซื้อสินค้าส่วนกลางสำหรับสาขา</p>
         </div>
     </div>
 
@@ -84,15 +84,11 @@
     </div>
 
     <script>
-        // =======================================================
-        // 🔴 วาง URL ที่ได้จากขั้นตอนการ Deploy เวอร์ชันใหม่ ลงในช่องนี้
-        // =======================================================
         const API_URL = "https://script.google.com/macros/s/AKfycbxdbBQAGR5PxeJleVBJ5ipFimx-CmjXSvDAY_pD3RSfaY4b61hIiZkPpGnyrKwvdqHU/exec"; 
         
         let allAvailableProducts = [];
         let currentSelectedPromoType = "";
 
-        // ฟังก์ชันดึงข้อมูลหลังจากเลือกสาขา
         function onBranchSelected() {
             const branch = document.getElementById('branchSelector').value;
             if (!branch) return;
@@ -107,7 +103,12 @@
             fetch(`${API_URL}?action=getProducts&branch=${encodeURIComponent(branch)}`)
                 .then(res => res.json())
                 .then(data => {
-                    allAvailableProducts = data;
+                    // 🟢 การแก้บั๊ก: ฝัง ID ลับ (Index) ให้สินค้าทุกตัวเพื่อแก้ปัญหาบาร์โค้ดซ้ำ
+                    allAvailableProducts = data.map((item, index) => {
+                        item.originalIndex = index;
+                        return item;
+                    });
+                    
                     Swal.close();
                     
                     if(allAvailableProducts.length === 0) {
@@ -126,7 +127,6 @@
                 .catch(err => Swal.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้: ' + err, 'error'));
         }
 
-        // จัดกลุ่มประเภทโปรโมชั่น และทำตัวเลขแจ้งเตือนสีแดง
         function renderPromoTypeFilters() {
             const grid = document.getElementById('promoTypeButtonGrid');
             grid.innerHTML = '';
@@ -147,7 +147,6 @@
             });
         }
 
-        // แสดงตารางสินค้าแยกตามโปร
         function filterByPromoType(type) {
             currentSelectedPromoType = type;
             document.querySelectorAll('.promo-filter-btn').forEach(b => b.classList.remove('active'));
@@ -159,9 +158,8 @@
             const filtered = allAvailableProducts.filter(p => p.promoType === type);
 
             filtered.forEach((p) => {
-                const globalIdx = allAvailableProducts.findIndex(gp => gp.barcode === p.barcode);
-                
-                // 🟢 ดักจับข้อมูล: ป้องกัน undefined และบังคับให้จำนวน DU เป็นตัวเลขเสมอ
+                // 🟢 ดึง ID ลับมาใช้แทนการค้นหาด้วยบาร์โค้ด กล่องพิมพ์เลขจะไม่สับสนอีกต่อไป
+                const globalIdx = p.originalIndex;
                 const safeDuSize = (p.duSize && !isNaN(p.duSize)) ? parseInt(p.duSize) : 1;
 
                 const tr = document.createElement('tr');
@@ -191,31 +189,29 @@
             document.getElementById('actionFooter').style.display = 'flex';
         }
 
-        // คำนวณราคายอดรวมชิ้นสั่ง
         function calculateTotal(index, duSize) {
             const val = document.getElementById(`du_${index}`).value;
             document.getElementById(`total_${index}`).innerText = (val * duSize) || 0;
             
             let activeCount = 0;
-            allAvailableProducts.forEach((p, i) => {
-                let el = document.getElementById(`du_${i}`);
+            allAvailableProducts.forEach((p) => {
+                let el = document.getElementById(`du_${p.originalIndex}`);
                 if (el && el.value > 0) activeCount++;
             });
             document.getElementById('activeOrderCount').innerText = activeCount;
         }
 
-        // ประมวลผลเมื่อกดบันทึก
         function processSubmit() {
             const branch = document.getElementById('branchSelector').value;
             const orders = [];
 
-            allAvailableProducts.forEach((p, i) => {
-                let el = document.getElementById(`du_${i}`);
+            allAvailableProducts.forEach((p) => {
+                let el = document.getElementById(`du_${p.originalIndex}`);
                 if (el && el.value > 0) {
                     orders.push({
                         product: p,
                         duQty: el.value,
-                        totalQty: document.getElementById(`total_${i}`).innerText
+                        totalQty: document.getElementById(`total_${p.originalIndex}`).innerText
                     });
                 }
             });
@@ -255,7 +251,6 @@
                         }
                     })
                     .catch(err => {
-                        // บายพาสเบราว์เซอร์ลวง
                         Swal.fire({ title: 'บันทึกสำเร็จ!', text: 'อัปเดตแผ่นงาน Orders เรียบร้อยแล้ว', icon: 'success', confirmButtonColor: '#134074' })
                         .then(() => onBranchSelected());
                     });
