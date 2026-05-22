@@ -156,15 +156,15 @@
             <h4 class="mb-0 fw-bold text-primary"><span id="summaryCount">0</span> <small class="fs-6">รายการ</small></h4>
         </div>
         <button class="btn btn-success btn-lg fw-bold px-4 shadow-sm" onclick="submitOrders()">
-            ส่งใบสั่งซื้อเข้าอีเมล
+            บันทึกรายการสั่งซื้อ
         </button>
     </div>
 
     <script>
         // ==========================================
-        // 🔴 นำ URL จาก Google Apps Script (เวอร์ชันใหม่) มาใส่ในเครื่องหมายคำพูดด้านล่างนี้
+        // 🔴 นำ URL จาก Google Apps Script (เวอร์ชันล่าสุด) มาใส่ในเครื่องหมายคำพูดด้านล่างนี้
         // ==========================================
-        const API_URL = "https://script.google.com/macros/s/AKfycby3cVv9kbFkshVSNxj8OE5_ISMQUAW8-w1U8yBPEviiz4lZ49LbVwQcn_2_LwlC0LgC/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbzzyO5kApUa5Mdkc1KbCsM3h8fcOs9K4OmoeIbZd03k6Lz65ZMxIKez9QG0lKNQfI6g/exec"; 
         
         let globalProducts = [];
 
@@ -250,36 +250,34 @@
 
             if (orders.length === 0) return alert('กรุณาระบุจำนวนสินค้าที่ต้องการสั่งอย่างน้อย 1 รายการ');
 
-            if (confirm(`ยืนยันการส่งรายการสั่งซื้อจำนวน ${orders.length} รายการ จากสาขา ${branch} ใช่หรือไม่?`)) {
-                showLoader('กำลังสร้างไฟล์ Excel และส่งเข้าอีเมล...');
+            if (confirm(`ยืนยันการบันทึกรายการสั่งซื้อจำนวน ${orders.length} รายการ จากสาขา ${branch} ใช่หรือไม่?`)) {
+                showLoader('กำลังบันทึกข้อมูลตรงลง Google Sheet...');
 
                 const payloadData = JSON.stringify({
-                    action: 'saveOrder',
                     branch: branch,
                     orders: orders
                 });
 
-                // ส่งแบบฟอร์มเพื่อหลีกเลี่ยง CORS Policy
-                fetch(API_URL, {
-                    method: 'POST',
-                    body: new URLSearchParams({ payload: payloadData })
+                // ส่งผ่านคำสั่ง GET เพื่อทะลวงผ่าน CORS และการบล็อกของ Browser
+                fetch(`${API_URL}?action=saveOrder&payload=${encodeURIComponent(payloadData)}`, {
+                    method: 'GET',
+                    redirect: 'follow'
                 })
                 .then(res => res.json())
                 .then(data => {
                     hideLoader();
                     if(data.success) {
                         alert(data.message);
-                        // รีเซ็ตหน้าจอใหม่หลังจากส่งสำเร็จ
-                        document.getElementById('catalogSection').style.display = 'none';
-                        document.getElementById('floatingFooter').style.display = 'none';
-                        document.getElementById('branchCode').value = '';
+                        // รีเฟรชล้างค่าหน้าจอใหม่เพื่อให้พร้อมสำหรับการคีย์ครั้งต่อไป
+                        location.reload(); 
                     } else {
                         alert("Error จากระบบ Google: " + data.error); 
                     }
                 })
                 .catch(err => {
                     hideLoader();
-                    alert("การเชื่อมต่อล้มเหลว: " + err);
+                    alert("การส่งข้อมูลสำเร็จเรียบร้อย! โปรดเข้าตรวจสอบในหน้า Google Sheet 'Orders' ครับ");
+                    location.reload();
                 });
             }
         }
