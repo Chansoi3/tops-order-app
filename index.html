@@ -29,19 +29,6 @@
         /* สไตล์เสริมสำหรับลิงก์ค้นหารูปภาพ */
         .product-link { color: #134074; text-decoration: none; transition: 0.2s; }
         .product-link:hover { color: #0b2545; text-decoration: underline; }
-        
-        /* 🟢 เพิ่มแอนิเมชันกระพริบสำหรับคำแนะนำ */
-        @keyframes blinker {
-            50% { opacity: 0.3; }
-        }
-        .blinking-hint {
-            animation: blinker 1.5s linear infinite;
-            color: #d97706; /* สีส้มทองให้ดูเด่นแต่ไม่แสบตา */
-            font-size: 10px;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 6px;
-        }
     </style>
 </head>
 <body>
@@ -173,11 +160,9 @@
                 card.className = 'product-mobile-card';
                 card.innerHTML = `
                     <div class="mb-2">
-                        <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="fw-bold fs-6 lh-sm mb-0 d-inline-block product-link">
-                            ${p.name} 🔍
+                        <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="fw-bold fs-6 lh-sm mb-1 d-inline-block product-link">
+                            ${p.name}
                         </a>
-                        
-                        <span class="blinking-hint">👆 กดที่ชื่อเพื่อดูรูปภาพ</span>
                         
                         <div class="text-secondary mb-2" style="font-size: 11px;">
                             Barcode: ${p.barcode} | Group: ${p.group}
