@@ -11,7 +11,6 @@
     <style>
         body { font-family: 'Noto Sans Thai', sans-serif; background-color: #f0f2f5; color: #1f2937; padding-bottom: 90px; }
         
-        /* ปรับ Header ให้เล็กลงตามบรีฟ */
         .header-main { background: linear-gradient(135deg, #0b2545 0%, #134074 100%); color: white; padding: 15px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000;}
         
         .card-elegant { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: none; margin-bottom: 20px; }
@@ -21,12 +20,10 @@
         .promo-filter-btn.active { background-color: #134074; border-color: #134074; color: white; }
         .red-badge-corner { position: absolute; top: -8px; right: -8px; background-color: #ef4444; color: white; font-size: 11px; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(239,68,68,0.3); }
         
-        /* สไตล์สำหรับกล่องสินค้าแบบมือถือ (Mobile Card) */
         .product-mobile-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 15px; padding: 15px; border: 1px solid #f1f3f5; }
         .input-du-styled { width: 100%; max-width: 80px; text-align: center; font-weight: 700; border: 2px solid #cbd5e1; border-radius: 8px; padding: 6px; font-size: 16px;}
         .input-du-styled:focus { border-color: #134074; box-shadow: none; outline: none; }
         
-        /* ปรับแถบด้านล่างให้ไม่กินพื้นที่จอมากเกินไป */
         .sticky-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1010; }
     </style>
 </head>
@@ -40,7 +37,7 @@
 
     <div class="container px-3">
         <div class="card card-elegant p-3">
-            <label class="form-label fw-bold text-dark fs-6 mb-2">1. กรุณาเลือกรหัสสาขา</label>
+            <label class="form-label fw-bold text-dark fs-6 mb-2">📍 กรุณาเลือกรหัสสาขา</label>
             <select class="form-select form-select-lg" style="font-size: 15px;" id="branchSelector" onchange="onBranchSelected()">
                 <option value="" selected disabled>--- คลิกเพื่อเลือกสาขา ---</option>
                 <option value="730 - Piean - Pin 2">730 - Piean - Pin 2</option>
@@ -60,12 +57,12 @@
         </div>
 
         <div class="card card-elegant p-3" id="promoFilterSection" style="display: none;">
-            <label class="form-label fw-bold text-dark fs-6 mb-3">2. เลือกประเภท Promotion Type</label>
+            <label class="form-label fw-bold text-dark fs-6 mb-3">🏷️ เลือกประเภท Promotion Type</label>
             <div class="row g-3" id="promoTypeButtonGrid"></div>
         </div>
 
         <div id="productListSection" style="display: none;">
-            </div>
+        </div>
     </div>
 
     <div class="sticky-action-bar" id="actionFooter" style="display: none;">
@@ -141,14 +138,13 @@
             });
         }
 
-        // สร้างรายการสินค้าใหม่ในรูปแบบการ์ดที่เหมาะกับมือถือ (Mobile-Friendly)
         function filterByPromoType(type) {
             currentSelectedPromoType = type;
             document.querySelectorAll('.promo-filter-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`btn_${type}`).classList.add('active');
 
             const listSection = document.getElementById('productListSection');
-            listSection.innerHTML = ''; // ล้างของเก่า
+            listSection.innerHTML = ''; 
 
             const filtered = allAvailableProducts.filter(p => p.promoType === type);
 
@@ -192,7 +188,6 @@
             listSection.style.display = 'block';
             document.getElementById('actionFooter').style.display = 'flex';
             
-            // เลื่อนหน้าจอลงมาให้เห็นสินค้า
             setTimeout(() => {
                 window.scrollBy({ top: 100, behavior: 'smooth' });
             }, 100);
