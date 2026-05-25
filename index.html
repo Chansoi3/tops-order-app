@@ -226,6 +226,40 @@
         .stat-card .l { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 4px; }
         .chart-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
         .chart-wrap { position: relative; height: 280px; }
+
+        /* ---------- Stepper (+/-) ---------- */
+        .stepper { display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .step-btn {
+            width: 34px; height: 38px; padding: 0;
+            border: 1px solid var(--line); background: #fff; border-radius: 9px;
+            font-size: 20px; font-weight: 700; color: var(--brand); line-height: 1;
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background .15s ease, transform .08s ease;
+        }
+        .step-btn:hover { background: var(--brand-soft); }
+        .step-btn:active { transform: scale(.92); }
+        .stepper .input-du-styled { max-width: 60px; }
+
+        /* ---------- Deadline banner ---------- */
+        .deadline-banner {
+            border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px;
+            display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 13px; line-height: 1.35;
+        }
+        .deadline-banner svg { width: 22px; height: 22px; flex-shrink: 0; }
+        .deadline-ok { background: #eaf3ff; color: var(--brand); border: 1px solid #cfe0ff; }
+        .deadline-warn { background: #fff4e5; color: #b3541e; border: 1px solid #ffd9a8; }
+        .deadline-expired { background: #fdecec; color: #b02a37; border: 1px solid #f5c2c7; }
+
+        /* ---------- Filter bars ---------- */
+        .filter-bar { background: #fff; border-bottom: 1px solid var(--line); padding: 12px 16px; }
+        .filter-bar .form-control, .filter-bar .form-select { font-size: 13px; padding: 7px 10px; }
+        .stats-filter {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 14px;
+        }
+        .stats-filter .form-control { max-width: 150px; font-size: 13px; padding: 7px 10px; }
+        .del-btn { border: 0; background: transparent; color: #c1c7d0; cursor: pointer; padding: 2px 6px; line-height: 1; border-radius: 6px; }
+        .del-btn:hover { color: var(--accent); background: #fdecec; }
     </style>
 </head>
 <body>
@@ -284,6 +318,7 @@
             </ul>
 
             <div id="mode-promo">
+                <div id="promoDeadline"></div>
                 <div class="card card-elegant p-3" id="promoFilterSection">
                     <label class="form-label mb-2" for="promoSearchInput">ค้นหาสินค้าโปรโมชั่นด้วยบาร์โค้ด</label>
                     <div class="input-group mb-3">
@@ -328,6 +363,17 @@
                 </button>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
             </div>
+        </div>
+        <div class="filter-bar" id="historyFilters" style="display:none;">
+            <select id="histBranch" class="form-select mb-2" onchange="applyHistoryFilters()">
+                <option value="">ทุกสาขา</option>
+            </select>
+            <div class="d-flex gap-2 align-items-center">
+                <input type="date" id="histFrom" class="form-control" onchange="applyHistoryFilters()" title="ตั้งแต่วันที่">
+                <span class="text-muted small">ถึง</span>
+                <input type="date" id="histTo" class="form-control" onchange="applyHistoryFilters()" title="ถึงวันที่">
+            </div>
+            <button class="btn btn-sm btn-link p-0 mt-1 text-decoration-none" onclick="clearHistoryFilters()">ล้างตัวกรอง</button>
         </div>
         <div class="offcanvas-body" id="historyBody"></div>
     </div>
@@ -397,6 +443,105 @@
             return isNaN(d) ? "-" : d.toLocaleDateString("th-TH");
         }
 
+        // ---------- Draft (บันทึกร่างอัตโนมัติ) ----------
+        function currentBranchCode() {
+            return String($("branchSelector").value || "").split("-")[0].trim();
+        }
+        function draftKey(code) { return "am404_draft_" + code; }
+
+        function saveDraft() {
+            const code = currentBranchCode();
+            if (!code) return;
+            const promo = {};
+            state.promoProducts.forEach(p => {
+                const q = state.promoQty[p.originalIndex];
+                if (q != null && q !== "" && parseFloat(q) > 0) promo[p.originalIndex] = { b: p.barcode, q: String(q) };
+            });
+            const normal = state.normalCart
+                .filter(p => parseFloat(p.duQty) > 0)
+                .map(p => ({ b: p.barcode, q: String(p.duQty) }));
+            try {
+                if (Object.keys(promo).length === 0 && normal.length === 0) {
+                    localStorage.removeItem(draftKey(code));
+                } else {
+                    localStorage.setItem(draftKey(code), JSON.stringify({ v: 1, promo, normal, savedAt: Date.now() }));
+                }
+            } catch (e) { /* localStorage ไม่พร้อมใช้งาน */ }
+        }
+
+        function clearDraft() {
+            const code = currentBranchCode();
+            if (code) { try { localStorage.removeItem(draftKey(code)); } catch (e) {} }
+        }
+
+        function restoreDraft() {
+            const code = currentBranchCode();
+            if (!code) return 0;
+            let draft;
+            try { draft = JSON.parse(localStorage.getItem(draftKey(code)) || "null"); } catch (e) { draft = null; }
+            if (!draft) return 0;
+
+            let restored = 0;
+            if (draft.promo) {
+                Object.keys(draft.promo).forEach(idx => {
+                    const entry = draft.promo[idx];
+                    const p = state.promoProducts[idx];
+                    if (p && p.barcode === entry.b) { state.promoQty[idx] = entry.q; restored++; }
+                });
+            }
+            if (Array.isArray(draft.normal)) {
+                draft.normal.forEach(entry => {
+                    const prod = state.normalProducts.find(p => p.barcode === entry.b);
+                    if (prod && !state.normalCart.some(c => c.barcode === entry.b)) {
+                        state.normalCart.push({ ...prod, cartId: Date.now() + Math.floor(Math.random() * 100000), duQty: entry.q });
+                        restored++;
+                    }
+                });
+            }
+            return restored;
+        }
+
+        // ---------- ปุ่ม +/- ----------
+        function stepPromo(index, du, delta) {
+            const input = $(`du_promo_${index}`);
+            if (!input) return;
+            let n = (parseFloat(input.value) || 0) + delta;
+            if (n < 0) n = 0;
+            input.value = n > 0 ? n : "";
+            onPromoInput(index, du, input.value);
+        }
+        function stepNormal(cartId, delta) {
+            const input = $(`du_normal_${cartId}`);
+            if (!input) return;
+            let n = (parseFloat(input.value) || 0) + delta;
+            if (n < 0) n = 0;
+            input.value = n > 0 ? n : "";
+            onNormalInput(cartId, input.value);
+        }
+
+        // ---------- แจ้งเตือนรอบ/เดดไลน์การสั่ง ----------
+        function renderPromoDeadline() {
+            const el = $("promoDeadline");
+            const dates = state.promoProducts.map(p => new Date(p.endDate)).filter(d => !isNaN(d));
+            if (!dates.length) { el.innerHTML = ""; return; }
+
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const dayMs = 86400000;
+            const upcoming = dates.filter(d => d.getTime() >= today.getTime());
+            const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+
+            if (upcoming.length) {
+                const soonest = new Date(Math.min(...upcoming.map(d => d.getTime())));
+                const daysLeft = Math.round((soonest.getTime() - today.getTime()) / dayMs);
+                const cls = daysLeft <= 2 ? "deadline-warn" : "deadline-ok";
+                const leftText = daysLeft <= 0 ? "วันสุดท้ายแล้ววันนี้!" : `เหลืออีก ${daysLeft} วัน`;
+                el.innerHTML = `<div class="deadline-banner ${cls} fade-in">${icon}<div>ปิดรับออเดอร์โปรโมชั่นรอบนี้: <b>${soonest.toLocaleDateString("th-TH")}</b> • ${leftText}</div></div>`;
+            } else {
+                const latest = new Date(Math.max(...dates.map(d => d.getTime())));
+                el.innerHTML = `<div class="deadline-banner deadline-expired fade-in">${icon}<div>โปรโมชั่นรอบนี้หมดเขตแล้ว (สิ้นสุด ${latest.toLocaleDateString("th-TH")})</div></div>`;
+            }
+        }
+
         // ---------- Branch loading ----------
         function onBranchSelected() {
             const branch = $("branchSelector").value;
@@ -421,7 +566,15 @@
                 $("promoListSection").innerHTML = "";
 
                 renderPromoTypeFilters();
+                renderPromoDeadline();
+
+                const restoredCount = restoreDraft();
+                renderNormalCart();
                 switchMode("promo");
+
+                if (restoredCount > 0) {
+                    Swal.fire({ toast: true, position: "top-end", icon: "info", title: `กู้คืนร่างที่ค้างไว้ ${restoredCount} รายการ`, showConfirmButton: false, timer: 2800 });
+                }
             }).catch(() => Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้", "error"));
         }
 
@@ -497,7 +650,11 @@
                             <div class="col-4">
                                 <div class="qty-box">
                                     <div class="label-tiny mb-1">ระบุ DU</div>
-                                    <input type="number" class="form-control input-du-styled mx-auto" id="du_promo_${p.originalIndex}" min="0" placeholder="0" value="${escapeHtml(qty)}" oninput="onPromoInput(${p.originalIndex}, ${du}, this.value)">
+                                    <div class="stepper">
+                                        <button type="button" class="step-btn" onclick="stepPromo(${p.originalIndex}, ${du}, -1)">−</button>
+                                        <input type="number" class="form-control input-du-styled" id="du_promo_${p.originalIndex}" min="0" placeholder="0" value="${escapeHtml(qty)}" oninput="onPromoInput(${p.originalIndex}, ${du}, this.value)">
+                                        <button type="button" class="step-btn" onclick="stepPromo(${p.originalIndex}, ${du}, 1)">+</button>
+                                    </div>
                                     <div class="label-tiny mt-1">(${du} ชิ้น/DU)</div>
                                 </div>
                             </div>
@@ -520,6 +677,7 @@
             $(`total_promo_${index}`).innerText = total;
             $(`card_promo_${index}`).classList.toggle("is-active", total > 0);
             refreshCounts();
+            saveDraft();
         }
 
         // ================= โหมดราคาปกติ (RMS) =================
@@ -535,6 +693,7 @@
                 if (!exists) {
                     state.normalCart.push({ ...foundProduct, cartId: Date.now(), duQty: "" });
                     renderNormalCart();
+                    saveDraft();
                 } else {
                     Swal.fire({ title: "สินค้านี้ถูกเลือกแล้ว", text: "รายการอยู่ด้านล่าง โปรดแก้ไขจำนวน", icon: "info", timer: 1500, showConfirmButton: false });
                 }
@@ -549,6 +708,7 @@
             state.normalCart = state.normalCart.filter(p => p.cartId !== cartId);
             renderNormalCart();
             refreshCounts();
+            saveDraft();
         }
 
         function renderNormalCart() {
@@ -569,7 +729,11 @@
                             <div class="col-6">
                                 <div class="qty-box">
                                     <div class="label-tiny mb-1">ระบุ DU</div>
-                                    <input type="number" class="form-control input-du-styled mx-auto" id="du_normal_${p.cartId}" min="0" placeholder="0" value="${escapeHtml(p.duQty)}" oninput="onNormalInput(${p.cartId}, this.value)">
+                                    <div class="stepper">
+                                        <button type="button" class="step-btn" onclick="stepNormal(${p.cartId}, -1)">−</button>
+                                        <input type="number" class="form-control input-du-styled" id="du_normal_${p.cartId}" min="0" placeholder="0" value="${escapeHtml(p.duQty)}" oninput="onNormalInput(${p.cartId}, this.value)">
+                                        <button type="button" class="step-btn" onclick="stepNormal(${p.cartId}, 1)">+</button>
+                                    </div>
                                     <div class="label-tiny mt-1">(${du} ชิ้น/DU)</div>
                                 </div>
                             </div>
@@ -588,6 +752,7 @@
             item.duQty = value;
             $(`total_normal_${cartId}`).innerText = (parseFloat(value) || 0) * duSizeOf(item);
             refreshCounts();
+            saveDraft();
         }
 
         // ================= สรุปคำสั่งซื้อ =================
@@ -735,12 +900,14 @@
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
+                            clearDraft();
                             Swal.fire({ title: "บันทึกสำเร็จ", text: data.message, icon: "success", confirmButtonColor: BRAND }).then(() => location.reload());
                         } else {
                             Swal.fire("ข้อผิดพลาด", data.error, "error");
                         }
                     })
                     .catch(() => {
+                        clearDraft();
                         Swal.fire({ title: "บันทึกสำเร็จ", text: "ระบบได้ทำการอัปเดตคำสั่งซื้อเรียบร้อยแล้ว", icon: "success", confirmButtonColor: BRAND }).then(() => location.reload());
                     });
             });
@@ -765,21 +932,60 @@
             loadHistory(false);
         }
 
+        let historyOrders = [];
+
         function loadHistory(force) {
             const body = $("historyBody");
             body.innerHTML = `<div class="text-center text-muted py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">กำลังโหลด...</div></div>`;
-            fetchOrders(force).then(renderHistory).catch(() => {
+            fetchOrders(force).then(setHistoryData).catch(() => {
+                $("historyFilters").style.display = "none";
                 body.innerHTML = `<div class="empty-state">โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชอีกครั้ง</div>`;
             });
         }
 
-        function renderHistory(orders) {
+        function setHistoryData(orders) {
+            historyOrders = orders || [];
+
+            const sel = $("histBranch");
+            const seen = new Map();
+            historyOrders.forEach(o => { if (!seen.has(o.branchCode)) seen.set(o.branchCode, o.branchName); });
+            const prev = sel.value;
+            sel.innerHTML = `<option value="">ทุกสาขา</option>` +
+                [...seen.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+                    .map(([code, name]) => `<option value="${escapeHtml(code)}">${escapeHtml(code)} - ${escapeHtml(name)}</option>`).join("");
+            sel.value = prev;
+
+            $("historyFilters").style.display = historyOrders.length ? "block" : "none";
+            applyHistoryFilters();
+        }
+
+        function applyHistoryFilters() {
+            const code = $("histBranch").value;
+            const from = $("histFrom").value ? new Date($("histFrom").value + "T00:00:00").getTime() : null;
+            const to = $("histTo").value ? new Date($("histTo").value + "T23:59:59").getTime() : null;
+            const filtered = historyOrders.filter(o => {
+                if (code && o.branchCode !== code) return false;
+                if (from && (o.ts || 0) < from) return false;
+                if (to && (o.ts || 0) > to) return false;
+                return true;
+            });
+            renderHistoryList(filtered);
+        }
+
+        function clearHistoryFilters() {
+            $("histBranch").value = "";
+            $("histFrom").value = "";
+            $("histTo").value = "";
+            applyHistoryFilters();
+        }
+
+        function renderHistoryList(orders) {
             const body = $("historyBody");
             const sub = $("historySub");
 
             if (!orders.length) {
-                sub.innerText = "ยังไม่มีคำสั่งซื้อ";
-                body.innerHTML = `<div class="empty-state">ยังไม่มีคำสั่งซื้อที่บันทึกไว้</div>`;
+                sub.innerText = historyOrders.length ? "ไม่พบรายการตามตัวกรอง" : "ยังไม่มีคำสั่งซื้อ";
+                body.innerHTML = `<div class="empty-state">${historyOrders.length ? "ไม่พบคำสั่งซื้อตามเงื่อนไขที่กรอง" : "ยังไม่มีคำสั่งซื้อที่บันทึกไว้"}</div>`;
                 return;
             }
 
@@ -802,6 +1008,9 @@
                             <div class="fw-semibold" style="font-size:13px;line-height:1.3;">${escapeHtml(o.name)}</div>
                             <div class="meta-text">${escapeHtml(o.barcode)} • ${o.duQty} DU × ${o.duSize} • ${escapeHtml(o.promoType || "-")}</div>
                         </div>
+                        <button class="del-btn" title="ลบรายการนี้" onclick="deleteOrderItem('${escapeHtml(g.branchCode)}', ${g.ts}, '${escapeHtml(o.barcode)}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
                     </div>`).join("");
                 return `
                     <div class="history-group fade-in">
@@ -810,28 +1019,87 @@
                                 <div class="fw-bold" style="font-size:13px;color:var(--brand);">${escapeHtml(g.branchCode)} - ${escapeHtml(g.branchName)}</div>
                                 <div class="meta-text">${escapeHtml(g.date)}</div>
                             </div>
-                            <span class="badge bg-secondary">${g.items.length} รายการ • ${pieces} ชิ้น</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-secondary">${g.items.length} • ${pieces} ชิ้น</span>
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:11px;" onclick="deleteOrderBatch('${escapeHtml(g.branchCode)}', ${g.ts})">ยกเลิกบิล</button>
+                            </div>
                         </div>
                         ${rows}
                     </div>`;
             }).join("");
         }
 
+        // ---------- ยกเลิก/ลบคำสั่งซื้อ ----------
+        function deleteOrderItem(branchCode, ts, barcode) {
+            Swal.fire({ title: "ยกเลิกรายการนี้?", text: "ลบสินค้ารายการนี้ออกจากคำสั่งซื้อ", icon: "warning", showCancelButton: true, confirmButtonColor: "#e63946", cancelButtonText: "ยกเลิก", confirmButtonText: "ลบ" })
+                .then(r => { if (r.isConfirmed) doDeleteOrder({ branchCode, ts, barcode }); });
+        }
+        function deleteOrderBatch(branchCode, ts) {
+            Swal.fire({ title: "ยกเลิกทั้งบิล?", text: "ลบทุกรายการในคำสั่งซื้อรอบนี้", icon: "warning", showCancelButton: true, confirmButtonColor: "#e63946", cancelButtonText: "ยกเลิก", confirmButtonText: "ลบทั้งบิล" })
+                .then(r => { if (r.isConfirmed) doDeleteOrder({ branchCode, ts }); });
+        }
+        function doDeleteOrder(payload) {
+            Swal.fire({ title: "กำลังลบ...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            fetch(`${API_URL}?action=deleteOrder`, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
+                .then(res => res.json())
+                .then(data => {
+                    Swal.fire({ title: "ลบแล้ว", text: data.message || "ดำเนินการเรียบร้อย", icon: "success", timer: 1500, showConfirmButton: false });
+                    loadHistory(true);
+                })
+                .catch(() => Swal.fire("ผิดพลาด", "ลบไม่สำเร็จ ลองใหม่อีกครั้ง", "error"));
+        }
+
         // ================= กราฟสถิติการสั่งสินค้า =================
+        let statsOrders = [];
+
         function openStats() {
             bootstrap.Modal.getOrCreateInstance($("statsModal")).show();
             const body = $("statsBody");
             body.innerHTML = `<div class="text-center text-muted py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">กำลังประมวลผล...</div></div>`;
-            fetchOrders(false).then(renderStats).catch(() => {
+            fetchOrders(false).then(orders => {
+                statsOrders = orders || [];
+                if (!statsOrders.length) {
+                    body.innerHTML = `<div class="empty-state">ยังไม่มีข้อมูลคำสั่งซื้อสำหรับทำสถิติ</div>`;
+                    return;
+                }
+                body.innerHTML = `
+                    <div class="stats-filter">
+                        <span class="label-tiny">ช่วงวันที่</span>
+                        <input type="date" id="statsFrom" class="form-control" onchange="applyStatsFilters()">
+                        <span class="text-muted small">ถึง</span>
+                        <input type="date" id="statsTo" class="form-control" onchange="applyStatsFilters()">
+                        <button class="btn btn-sm btn-link p-0 text-decoration-none" onclick="clearStatsFilters()">ล้าง</button>
+                    </div>
+                    <div id="statsContent"></div>`;
+                renderStatsContent(statsOrders);
+            }).catch(() => {
                 body.innerHTML = `<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>`;
             });
         }
 
-        function renderStats(orders) {
-            const body = $("statsBody");
+        function applyStatsFilters() {
+            const from = $("statsFrom").value ? new Date($("statsFrom").value + "T00:00:00").getTime() : null;
+            const to = $("statsTo").value ? new Date($("statsTo").value + "T23:59:59").getTime() : null;
+            const filtered = statsOrders.filter(o => {
+                if (from && (o.ts || 0) < from) return false;
+                if (to && (o.ts || 0) > to) return false;
+                return true;
+            });
+            renderStatsContent(filtered);
+        }
+
+        function clearStatsFilters() {
+            $("statsFrom").value = "";
+            $("statsTo").value = "";
+            renderStatsContent(statsOrders);
+        }
+
+        function renderStatsContent(orders) {
+            const content = $("statsContent");
+            Object.values(charts).forEach(c => c && c.destroy());
 
             if (!orders.length) {
-                body.innerHTML = `<div class="empty-state">ยังไม่มีข้อมูลคำสั่งซื้อสำหรับทำสถิติ</div>`;
+                content.innerHTML = `<div class="empty-state">ไม่พบข้อมูลในช่วงวันที่ที่เลือก</div>`;
                 return;
             }
 
@@ -850,7 +1118,7 @@
             const branchCount = Object.keys(byBranch).length;
             const productCount = Object.keys(byProduct).length;
 
-            body.innerHTML = `
+            content.innerHTML = `
                 <div class="row g-2 mb-3">
                     <div class="col-3"><div class="stat-card"><div class="v">${orders.length.toLocaleString()}</div><div class="l">รายการสั่ง</div></div></div>
                     <div class="col-3"><div class="stat-card"><div class="v">${totalPieces.toLocaleString()}</div><div class="l">ชิ้นรวม</div></div></div>
@@ -860,8 +1128,6 @@
                 <div class="chart-card"><div class="section-title mb-2">ยอดสั่ง (ชิ้น) แยกตามสาขา</div><div class="chart-wrap"><canvas id="chartBranch"></canvas></div></div>
                 <div class="chart-card"><div class="section-title mb-2">สินค้าสั่งมากที่สุด 10 อันดับ</div><div class="chart-wrap"><canvas id="chartProduct"></canvas></div></div>
                 <div class="chart-card"><div class="section-title mb-2">สัดส่วนตาม Promotion Type</div><div class="chart-wrap"><canvas id="chartType"></canvas></div></div>`;
-
-            Object.values(charts).forEach(c => c && c.destroy());
 
             const PALETTE = ["#00205b", "#0a3a8f", "#e63946", "#1e8e5a", "#f4a261", "#6a4c93", "#2a9d8f", "#e76f51", "#457b9d", "#9d4edd"];
 

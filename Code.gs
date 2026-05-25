@@ -9,6 +9,9 @@
 
 const SHEET_ID = '10ikBHPlkfHpWtCKy3YBo77YCqzQUXOLHsT8VaPJB8Mk';
 
+// อีเมลที่จะรับสรุปคำสั่งซื้อทุกครั้งที่มีการบันทึก
+const NOTIFY_EMAIL = 'Piwirakorn@tops.co.th';
+
 const SHEET = { PRODUCTS: 'Products', RMS: 'RMS', ORDERS: 'Orders' };
 
 const ORDERS_HEADER = [
@@ -42,6 +45,12 @@ function handleRequest(e) {
         const branch = e.parameter.branch || payload.branch;
         const msg = saveToOrdersSheet(branch, payload.orders || []);
         return jsonResponse({ success: true, message: msg });
+      }
+
+      case 'deleteOrder': {
+        const payload = parsePayload(e);
+        const count = deleteOrders(payload.branchCode, payload.ts, payload.barcode);
+        return jsonResponse({ success: true, deleted: count, message: 'ยกเลิกคำสั่งซื้อ ' + count + ' รายการแล้ว' });
       }
 
       default:
@@ -211,10 +220,105 @@ function saveToOrdersSheet(branch, orders) {
     });
 
     sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, ORDERS_HEADER.length).setValues(rows);
+
+    // ส่งอีเมลสรุป (ไม่ให้ล้มเหลวกระทบการบันทึก)
+    try {
+      sendOrderEmail(branchCode, branchName, timestamp, rows);
+    } catch (mailErr) {
+      Logger.log('ส่งอีเมลไม่สำเร็จ: ' + mailErr);
+    }
+
     return 'บันทึกข้อมูลจำนวน ' + rows.length + ' รายการ เข้าฐานข้อมูลเรียบร้อยแล้ว!';
   } finally {
     lock.releaseLock();
   }
+}
+
+// ---------- 5. ยกเลิก/ลบคำสั่งซื้อ ----------
+// ลบทั้งบิล: ส่ง branchCode + ts | ลบรายเดียว: ส่ง branchCode + ts + barcode
+function deleteOrders(branchCode, ts, barcode) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName(SHEET.ORDERS);
+    if (!sheet || sheet.getLastRow() < 2) return 0;
+
+    const code = String(branchCode).trim();
+    const targetTs = Number(ts);
+    const data = sheet.getDataRange().getValues();
+    const rowsToDelete = [];
+
+    for (let i = 1; i < data.length; i++) {
+      const r = data[i];
+      const rowTs = (Object.prototype.toString.call(r[0]) === '[object Date]') ? r[0].getTime() : 0;
+      if (String(r[1]).trim() !== code) continue;
+      if (rowTs !== targetTs) continue;
+      if (barcode && String(r[3]).trim() !== String(barcode).trim()) continue;
+      rowsToDelete.push(i + 1); // 1-based row number
+    }
+
+    // ลบจากล่างขึ้นบนเพื่อไม่ให้ index เลื่อน
+    for (let j = rowsToDelete.length - 1; j >= 0; j--) {
+      sheet.deleteRow(rowsToDelete[j]);
+    }
+    return rowsToDelete.length;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ---------- ส่งอีเมลสรุปคำสั่งซื้อ ----------
+function sendOrderEmail(branchCode, branchName, timestamp, rows) {
+  if (!NOTIFY_EMAIL) return;
+
+  const tz = Session.getScriptTimeZone();
+  const dateStr = Utilities.formatDate(timestamp, tz, 'dd/MM/yyyy HH:mm');
+  let totalPieces = 0;
+
+  let tableRows = '';
+  rows.forEach(function (r, i) {
+    totalPieces += Number(r[7]) || 0;
+    tableRows +=
+      '<tr>' +
+      '<td style="padding:6px 8px;border:1px solid #e7eaf0;text-align:center;">' + (i + 1) + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid #e7eaf0;">' + r[4] + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid #e7eaf0;text-align:center;">' + r[3] + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid #e7eaf0;text-align:center;">' + r[6] + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid #e7eaf0;text-align:center;">' + r[7] + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid #e7eaf0;text-align:center;">' + r[10] + '</td>' +
+      '</tr>';
+  });
+
+  const html =
+    '<div style="font-family:Arial,sans-serif;color:#1f2a44;max-width:700px;">' +
+      '<div style="background:#00205b;color:#fff;padding:16px 20px;border-radius:10px 10px 0 0;">' +
+        '<h2 style="margin:0;font-size:18px;">คำสั่งซื้อใหม่ - AM404</h2>' +
+        '<div style="font-size:13px;opacity:.85;">ระบบสั่งสินค้า AM404</div>' +
+      '</div>' +
+      '<div style="border:1px solid #e7eaf0;border-top:0;padding:16px 20px;border-radius:0 0 10px 10px;">' +
+        '<p style="margin:4px 0;"><b>สาขา:</b> ' + branchCode + ' - ' + branchName + '</p>' +
+        '<p style="margin:4px 0;"><b>วันที่/เวลา:</b> ' + dateStr + '</p>' +
+        '<p style="margin:4px 0;"><b>จำนวนรายการ:</b> ' + rows.length + ' • <b>รวม:</b> ' + totalPieces + ' ชิ้น</p>' +
+        '<table style="border-collapse:collapse;width:100%;margin-top:12px;font-size:13px;">' +
+          '<thead><tr style="background:#f3f5fa;">' +
+            '<th style="padding:6px 8px;border:1px solid #e7eaf0;">#</th>' +
+            '<th style="padding:6px 8px;border:1px solid #e7eaf0;text-align:left;">ชื่อสินค้า</th>' +
+            '<th style="padding:6px 8px;border:1px solid #e7eaf0;">บาร์โค้ด</th>' +
+            '<th style="padding:6px 8px;border:1px solid #e7eaf0;">DU</th>' +
+            '<th style="padding:6px 8px;border:1px solid #e7eaf0;">รวมชิ้น</th>' +
+            '<th style="padding:6px 8px;border:1px solid #e7eaf0;">ประเภท</th>' +
+          '</tr></thead>' +
+          '<tbody>' + tableRows + '</tbody>' +
+        '</table>' +
+      '</div>' +
+    '</div>';
+
+  MailApp.sendEmail({
+    to: NOTIFY_EMAIL,
+    subject: '[AM404] คำสั่งซื้อใหม่ - ' + branchCode + ' ' + branchName + ' (' + rows.length + ' รายการ)',
+    htmlBody: html
+  });
 }
 
 function toNumber(value, fallback) {
