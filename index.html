@@ -3,45 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AM404 สั่งสินค้าประจำรอบโปรโมชั่น</title>
+    <title>AM404 ระบบสั่งสินค้า</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        body { font-family: 'Noto Sans Thai', sans-serif; background-color: #f0f2f5; color: #1f2937; padding-bottom: 90px; }
-        .header-main { background: linear-gradient(135deg, #0b2545 0%, #134074 100%); color: white; padding: 15px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000;}
-        .card-elegant { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: none; margin-bottom: 20px; }
+        body { font-family: 'Noto Sans Thai', sans-serif; background-color: #f4f6f9; color: #333; padding-bottom: 90px; }
+        .header-main { background: #00205b; color: white; padding: 18px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000;}
+        .card-elegant { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e9ecef; margin-bottom: 20px; }
         
-        .promo-filter-btn { position: relative; background: white; border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px 10px; text-align: center; font-weight: 600; cursor: pointer; transition: all 0.2s; color: #4b5563; font-size: 14px;}
-        .promo-filter-btn:hover { border-color: #134074; background-color: #f8fafc; }
-        .promo-filter-btn.active { background-color: #134074; border-color: #134074; color: white; }
-        .red-badge-corner { position: absolute; top: -8px; right: -8px; background-color: #ef4444; color: white; font-size: 11px; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(239,68,68,0.3); }
+        .promo-filter-btn { background: white; border: 1px solid #ced4da; border-radius: 6px; padding: 10px 8px; text-align: center; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #495057; font-size: 14px; position: relative;}
+        .promo-filter-btn:hover { border-color: #00205b; background-color: #f8f9fa; }
+        .promo-filter-btn.active { background-color: #00205b; border-color: #00205b; color: white; }
+        .red-badge-corner { position: absolute; top: -6px; right: -6px; background-color: #dc3545; color: white; font-size: 10px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         
-        .product-mobile-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 15px; padding: 15px; border: 1px solid #f1f3f5; }
-        .input-du-styled { width: 100%; max-width: 80px; text-align: center; font-weight: 700; border: 2px solid #cbd5e1; border-radius: 8px; padding: 6px; font-size: 16px;}
-        .input-du-styled:focus { border-color: #134074; box-shadow: none; outline: none; }
+        .product-mobile-card { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 15px; padding: 15px; border: 1px solid #e9ecef; }
+        .input-du-styled { width: 100%; max-width: 80px; text-align: center; font-weight: 600; border: 1px solid #ced4da; border-radius: 6px; padding: 6px; font-size: 15px;}
+        .input-du-styled:focus { border-color: #00205b; box-shadow: 0 0 0 0.2rem rgba(0,32,91,0.25); outline: none; }
         
-        .sticky-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1010; }
-        .product-link { color: #134074; text-decoration: none; transition: 0.2s; }
-        .product-link:hover { color: #0b2545; text-decoration: underline; }
+        .sticky-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1010; border-top: 1px solid #dee2e6;}
+        
+        .product-link { color: #004085; text-decoration: underline; transition: 0.2s; font-weight: 600; }
+        .product-link:hover { color: #00205b; text-decoration: none; }
 
-        .nav-pills .nav-link { color: #4b5563; font-weight: 600; border-radius: 10px; padding: 10px; border: 2px solid transparent; }
-        .nav-pills .nav-link.active { background-color: #134074; color: white; border: 2px solid #134074; box-shadow: 0 4px 8px rgba(19, 64, 116, 0.2); }
+        .nav-pills .nav-link { color: #495057; font-weight: 600; border-radius: 6px; padding: 10px; border: 1px solid #dee2e6; background-color: #f8f9fa;}
+        .nav-pills .nav-link.active { background-color: #00205b; color: white; border: 1px solid #00205b; }
+        .form-label { font-weight: 600; color: #212529; }
     </style>
 </head>
 <body>
 
-    <div class="header-main text-center mb-3">
+    <div class="header-main text-center mb-4">
         <div class="container">
-            <h5 class="fw-bold mb-0">AM404 สั่งสินค้า</h5>
+            <h5 class="fw-bold mb-0">AM404 ระบบสั่งสินค้า</h5>
         </div>
     </div>
 
     <div class="container px-3">
         <div class="card card-elegant p-3">
-            <label class="form-label fw-bold text-dark fs-6 mb-2">📍 กรุณาเลือกรหัสสาขา</label>
-            <select class="form-select form-select-lg" style="font-size: 15px;" id="branchSelector" onchange="onBranchSelected()">
+            <label class="form-label fs-6 mb-2">กรุณาเลือกรหัสสาขา</label>
+            <select class="form-select" style="font-size: 15px;" id="branchSelector" onchange="onBranchSelected()">
                 <option value="" selected disabled>--- คลิกเพื่อเลือกสาขา ---</option>
                 <option value="730 - Piean - Pin 2">730 - Piean - Pin 2</option>
                 <option value="5209 - Soi Kusolsin">5209 - Soi Kusolsin</option>
@@ -61,25 +63,25 @@
 
         <div id="orderSystemContainer" style="display: none;">
             
-            <ul class="nav nav-pills nav-fill gap-2 mb-3 bg-white p-2 rounded-3 shadow-sm">
+            <ul class="nav nav-pills nav-fill gap-2 mb-3">
                 <li class="nav-item">
-                    <button class="nav-link active w-100" id="tab-promo" onclick="switchMode('promo')">สั่งสินค้าโปรโมชั่น</button>
+                    <button class="nav-link active w-100 shadow-sm" id="tab-promo" onclick="switchMode('promo')">สั่งสินค้าโปรโมชั่น</button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link w-100" id="tab-normal" onclick="switchMode('normal')">สั่งสินค้าราคาปกติ</button>
+                    <button class="nav-link w-100 shadow-sm" id="tab-normal" onclick="switchMode('normal')">สั่งสินค้าราคาปกติ</button>
                 </li>
             </ul>
 
             <div id="mode-promo">
                 <div class="card card-elegant p-3" id="promoFilterSection">
-                    <label class="form-label fw-bold text-dark fs-6 mb-2">🔍 ค้นหาสินค้าโปรโมชั่นด้วยบาร์โค้ด</label>
+                    <label class="form-label fs-6 mb-2">ค้นหาสินค้าโปรโมชั่นด้วยบาร์โค้ด</label>
                     <div class="input-group mb-3">
-                        <input type="number" class="form-control" id="promoSearchInput" placeholder="สแกน / พิมพ์บาร์โค้ด..." onkeypress="if(event.key==='Enter') searchPromoBarcode()">
-                        <button class="btn btn-primary px-3 fw-bold" onclick="searchPromoBarcode()">ค้นหา</button>
+                        <input type="number" class="form-control" id="promoSearchInput" placeholder="กรอกบาร์โค้ด..." onkeypress="if(event.key==='Enter') searchPromoBarcode()">
+                        <button class="btn btn-secondary px-3" onclick="searchPromoBarcode()">ค้นหา</button>
                     </div>
-                    <hr class="my-2" style="border-color: #e5e7eb;">
-                    <label class="form-label fw-bold text-dark fs-6 mb-2">🏷️ หรือเลือกจาก Promotion Type</label>
-                    <div class="row g-3" id="promoTypeButtonGrid"></div>
+                    <hr class="my-2" style="border-color: #dee2e6;">
+                    <label class="form-label fs-6 mb-2">หรือเลือกจาก Promotion Type</label>
+                    <div class="row g-2" id="promoTypeButtonGrid"></div>
                 </div>
 
                 <div id="promoListSection"></div>
@@ -87,12 +89,12 @@
 
             <div id="mode-normal" style="display: none;">
                 <div class="card card-elegant p-3">
-                    <label class="form-label fw-bold text-dark fs-6 mb-2">🔍 สแกนบาร์โค้ดเพื่อสั่งสินค้าราคาปกติ</label>
+                    <label class="form-label fs-6 mb-2">ค้นหาสินค้าราคาปกติด้วยบาร์โค้ด</label>
                     <div class="input-group">
-                        <input type="number" class="form-control form-control-lg" id="normalSearchInput" placeholder="ใส่ 14 หลัก เช่น 18853474091232" onkeypress="if(event.key==='Enter') searchNormalBarcode()">
-                        <button class="btn btn-success px-3 fw-bold" onclick="searchNormalBarcode()">ค้นหา</button>
+                        <input type="number" class="form-control" id="normalSearchInput" placeholder="ใส่ 13 หลัก เช่น 8851932426077" onkeypress="if(event.key==='Enter') searchNormalBarcode()">
+                        <button class="btn btn-secondary px-3" onclick="searchNormalBarcode()">ค้นหา</button>
                     </div>
-                    <small class="text-danger mt-2">*เฉพาะสินค้าที่มีในระบบ RMS</small>
+                    <small class="text-muted mt-2 d-block">*ระบบจะค้นหาจากฐานข้อมูล RMS</small>
                 </div>
 
                 <div id="normalCartSection"></div>
@@ -102,10 +104,10 @@
 
     <div class="sticky-action-bar" id="actionFooter" style="display: none;">
         <div>
-            <div class="text-secondary" style="font-size: 11px;">รายการที่ระบุ DU</div>
-            <h4 class="fw-bold mb-0 text-primary"><span id="activeOrderCount">0</span> <small class="fs-6 text-dark">รายการ</small></h4>
+            <div class="text-secondary" style="font-size: 12px; font-weight: 500;">จำนวนรายการสั่งซื้อ</div>
+            <h5 class="fw-bold mb-0 text-dark"><span id="activeOrderCount" class="text-primary">0</span> รายการ</h5>
         </div>
-        <button class="btn btn-primary fw-bold px-4 py-2 shadow-sm" onclick="processSubmit()">
+        <button class="btn btn-primary fw-bold px-4 py-2" onclick="processSubmit()">
             บันทึกคำสั่งซื้อ
         </button>
     </div>
@@ -122,7 +124,7 @@
             const branch = document.getElementById('branchSelector').value;
             if (!branch) return;
 
-            Swal.fire({ title: 'กำลังโหลดข้อมูล', text: 'ดึงข้อมูลโปรโมชั่น และ RMS...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'กำลังโหลดข้อมูล', text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             Promise.all([
                 fetch(`${API_URL}?action=getProducts&branch=${encodeURIComponent(branch)}`).then(res => res.json()),
@@ -140,7 +142,7 @@
                 
                 renderPromoTypeFilters();
                 switchMode('promo'); 
-            }).catch(err => Swal.fire('เกิดข้อผิดพลาด', 'เชื่อมต่อล้มเหลว', 'error'));
+            }).catch(err => Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error'));
         }
 
         function switchMode(mode) {
@@ -152,7 +154,7 @@
             document.getElementById('mode-normal').style.display = (mode === 'normal') ? 'block' : 'none';
 
             if (mode === 'normal') document.getElementById('normalSearchInput').focus();
-            calculateActiveCount(); // รีเฟรชยอดรวม
+            calculateActiveCount(); 
         }
 
         // ================= โหมดโปรโมชั่น =================
@@ -161,10 +163,9 @@
             const counts = {};
             dbPromoProducts.forEach(p => counts[p.promoType] = (counts[p.promoType] || 0) + 1);
 
-            // 🟢 แก้อาการกระตุก: สร้าง HTML string ให้เสร็จก่อนค่อยนำไปใส่
             let htmlContent = '';
             Object.keys(counts).forEach(type => {
-                htmlContent += `<div class="col-6 col-md-3"><div class="promo-filter-btn" id="btn_${type}" onclick="filterByPromoType('${type}')">${type}<div class="red-badge-corner">${counts[type]}</div></div></div>`;
+                htmlContent += `<div class="col-6 col-md-3"><div class="promo-filter-btn shadow-sm" id="btn_${type}" onclick="filterByPromoType('${type}')">${type}<div class="red-badge-corner">${counts[type]}</div></div></div>`;
             });
             grid.innerHTML = htmlContent;
         }
@@ -184,19 +185,15 @@
                 document.querySelectorAll('.promo-filter-btn').forEach(b => b.classList.remove('active'));
                 renderPromoList(found);
             } else {
-                Swal.fire('ไม่พบข้อมูล!', `ไม่มีสินค้ารหัส ${barcode} ในโปรโมชั่นรอบนี้`, 'warning');
+                Swal.fire('ไม่พบข้อมูล', `ไม่มีสินค้ารหัส ${barcode} ในโปรโมชั่นรอบนี้`, 'warning');
             }
         }
 
         function renderPromoList(products) {
             const listSection = document.getElementById('promoListSection');
-            
-            // 🟢 แก้อาการกระตุก: สร้าง HTML string รวดเดียวให้เสร็จก่อน
             let htmlContent = '';
             products.forEach((p) => {
                 const safeDuSize = (p.duSize && !isNaN(p.duSize)) ? parseInt(p.duSize) : 1;
-                
-                // ดึงค่าเก่าที่พิมพ์ค้างไว้มาแสดง (ถ้ามี)
                 const existingInput = document.getElementById(`du_promo_${p.originalIndex}`);
                 const existingVal = existingInput ? existingInput.value : '';
                 const existingTotal = existingInput ? (existingInput.value * safeDuSize) : 0;
@@ -204,27 +201,27 @@
                 htmlContent += `
                     <div class="product-mobile-card">
                         <div class="mb-2">
-                            <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="fw-bold fs-6 lh-sm mb-1 d-inline-block product-link">${p.name}</a>
+                            <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="product-link d-inline-block mb-1">${p.name}</a>
                             <div class="text-secondary mb-2" style="font-size: 11px;">Barcode: ${p.barcode} | Group: ${p.group}</div>
                             <div class="d-flex gap-1 flex-wrap">
-                                <span class="badge bg-dark" style="font-size: 10px; font-weight: 500;">รอบ: ${new Date(p.startDate).toLocaleDateString('th-TH')} - ${new Date(p.endDate).toLocaleDateString('th-TH')}</span>
-                                <span class="badge bg-danger" style="font-size: 10px; font-weight: 500;">โปร: ${p.promotionDesc}</span>
+                                <span class="badge bg-secondary" style="font-weight: 500;">รอบ: ${new Date(p.startDate).toLocaleDateString('th-TH')} - ${new Date(p.endDate).toLocaleDateString('th-TH')}</span>
+                                <span class="badge bg-danger" style="font-weight: 500;">โปร: ${p.promotionDesc}</span>
                             </div>
                         </div>
-                        <hr class="my-2" style="border-color: #e5e7eb;">
-                        <div class="row align-items-center text-center g-1">
+                        <hr class="my-3" style="border-color: #dee2e6;">
+                        <div class="row align-items-center text-center g-2">
                             <div class="col-4">
-                                <div class="text-muted" style="font-size: 10px; text-decoration: line-through;">ปกติ ฿${p.normalPrice}</div>
-                                <div class="text-success fw-bold" style="font-size: 15px;">฿${p.promoPrice}</div>
+                                <div class="text-muted" style="font-size: 11px; text-decoration: line-through;">ปกติ ฿${p.normalPrice}</div>
+                                <div class="text-success fw-bold" style="font-size: 15px;">โปร ฿${p.promoPrice}</div>
                             </div>
                             <div class="col-4 border-start border-end">
-                                <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">ระบุ DU</div>
+                                <div class="text-dark mb-1" style="font-size: 11px; font-weight: 600;">ระบุ DU</div>
                                 <input type="number" class="form-control input-du-styled mx-auto" id="du_promo_${p.originalIndex}" min="0" placeholder="0" value="${existingVal}" oninput="updateRowTotal(this, ${p.originalIndex}, ${safeDuSize}, 'promo')">
-                                <div class="text-muted mt-1" style="font-size: 9px;">(${safeDuSize} ชิ้น/DU)</div>
+                                <div class="text-muted mt-1" style="font-size: 10px;">(${safeDuSize} ชิ้น/DU)</div>
                             </div>
                             <div class="col-4">
-                                <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">รวมชิ้นสั่ง</div>
-                                <div class="fw-bold text-primary" style="font-size: 20px;" id="total_promo_${p.originalIndex}">${existingTotal}</div>
+                                <div class="text-dark mb-1" style="font-size: 11px; font-weight: 600;">รวมชิ้นสั่ง</div>
+                                <div class="fw-bold text-primary" style="font-size: 18px;" id="total_promo_${p.originalIndex}">${existingTotal}</div>
                             </div>
                         </div>
                     </div>`;
@@ -246,10 +243,10 @@
                     normalCart.push({ ...foundProduct, cartId: normalCart.length });
                     renderNormalCart();
                 } else {
-                    Swal.fire({ title: 'สินค้านี้คีย์แล้ว', text: 'รายการอยู่ด้านล่าง โปรดแก้ไขจำนวน', icon: 'info', timer: 1500, showConfirmButton: false });
+                    Swal.fire({ title: 'สินค้านี้ถูกเลือกแล้ว', text: 'รายการอยู่ด้านล่าง โปรดแก้ไขจำนวน', icon: 'info', timer: 1500, showConfirmButton: false });
                 }
             } else {
-                Swal.fire({ title: 'สั่งไม่ได้!', text: `รหัส ${barcode} ไม่มีในฐานข้อมูล RMS`, icon: 'error', confirmButtonColor: '#d33' });
+                Swal.fire({ title: 'ไม่พบข้อมูล', text: `รหัส ${barcode} ไม่มีในฐานข้อมูล RMS`, icon: 'error', confirmButtonColor: '#00205b' });
             }
             inputEl.value = "";
             inputEl.focus();
@@ -257,34 +254,31 @@
 
         function renderNormalCart() {
             const cartSection = document.getElementById('normalCartSection');
-            
-            // 🟢 แก้อาการกระตุก: สร้าง HTML string รวดเดียว
             let htmlContent = '';
             [...normalCart].reverse().forEach((p) => {
                 const safeDuSize = (p.duSize && !isNaN(p.duSize)) ? parseInt(p.duSize) : 1;
                 
-                // เก็บค่าเดิมที่พิมพ์ไว้ไม่ให้หาย
                 const existingInput = document.getElementById(`du_normal_${p.cartId}`);
                 const existingVal = existingInput ? existingInput.value : '';
                 const existingTotal = existingInput ? (existingInput.value * safeDuSize) : 0;
 
                 htmlContent += `
-                    <div class="product-mobile-card border-success border-2">
+                    <div class="product-mobile-card border-start border-4 border-secondary">
                         <div class="mb-2">
-                            <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="fw-bold fs-6 lh-sm mb-1 d-inline-block product-link">${p.name}</a>
+                            <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="product-link d-inline-block mb-1">${p.name}</a>
                             <div class="text-secondary mb-2" style="font-size: 11px;">Barcode: ${p.barcode}</div>
-                            <span class="badge bg-success" style="font-size: 10px; font-weight: 500;">สินค้าราคาปกติ (RMS)</span>
+                            <span class="badge bg-secondary" style="font-size: 10px; font-weight: 500;">ราคาปกติ (RMS)</span>
                         </div>
-                        <hr class="my-2" style="border-color: #e5e7eb;">
-                        <div class="row align-items-center text-center g-1">
+                        <hr class="my-3" style="border-color: #dee2e6;">
+                        <div class="row align-items-center text-center g-2">
                             <div class="col-6 border-end">
-                                <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">ระบุ DU</div>
+                                <div class="text-dark mb-1" style="font-size: 11px; font-weight: 600;">ระบุ DU</div>
                                 <input type="number" class="form-control input-du-styled mx-auto" id="du_normal_${p.cartId}" min="0" placeholder="0" value="${existingVal}" oninput="updateRowTotal(this, ${p.cartId}, ${safeDuSize}, 'normal')">
-                                <div class="text-muted mt-1" style="font-size: 9px;">(${safeDuSize} ชิ้น/DU)</div>
+                                <div class="text-muted mt-1" style="font-size: 10px;">(${safeDuSize} ชิ้น/DU)</div>
                             </div>
                             <div class="col-6">
-                                <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">รวมชิ้นสั่ง</div>
-                                <div class="fw-bold text-success" style="font-size: 24px;" id="total_normal_${p.cartId}">${existingTotal}</div>
+                                <div class="text-dark mb-1" style="font-size: 11px; font-weight: 600;">รวมชิ้นสั่ง</div>
+                                <div class="fw-bold text-dark" style="font-size: 20px;" id="total_normal_${p.cartId}">${existingTotal}</div>
                             </div>
                         </div>
                     </div>`;
@@ -292,7 +286,7 @@
             cartSection.innerHTML = htmlContent;
         }
 
-        // ================= ระบบคำนวณ =================
+        // ================= ระบบคำนวณและบันทึก =================
         function updateRowTotal(inputElement, id, duSize, mode) {
             const val = inputElement.value || 0;
             if (mode === 'promo') {
@@ -312,7 +306,6 @@
             document.getElementById('activeOrderCount').innerText = activeCount;
         }
 
-        // ================= บันทึกข้อมูล =================
         function processSubmit() {
             const branch = document.getElementById('branchSelector').value;
             const orders = [];
@@ -337,31 +330,31 @@
                 });
             }
 
-            if (orders.length === 0) return Swal.fire('คำเตือน', 'กรุณาระบุจำนวนสินค้าก่อนกดบันทึกครับ', 'warning');
+            if (orders.length === 0) return Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณาระบุจำนวนสินค้าที่ต้องการสั่งซื้อก่อนทำการบันทึก', 'warning');
 
             Swal.fire({
-                title: 'ยืนยันการบันทึก?',
-                text: `บันทึกคำสั่งซื้อโหมด ${currentMode === 'promo' ? 'โปรโมชั่น' : 'ราคาปกติ'} จำนวน ${orders.length} รายการ`,
+                title: 'ยืนยันการบันทึก',
+                text: `คุณต้องการบันทึกคำสั่งซื้อ จำนวน ${orders.length} รายการ ใช่หรือไม่?`,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#134074',
+                confirmButtonColor: '#00205b',
                 cancelButtonText: 'ยกเลิก',
-                confirmButtonText: 'ตกลง'
+                confirmButtonText: 'ยืนยัน'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({ title: 'กำลังบันทึกข้อมูล', text: 'โปรดรอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    Swal.fire({ title: 'กำลังบันทึกข้อมูล', text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     const payloadData = JSON.stringify({ branch: branch, orders: orders });
                     fetch(`${API_URL}?action=saveOrder&branch=${encodeURIComponent(branch)}&payload=${encodeURIComponent(payloadData)}`, { method: 'GET', redirect: 'follow' })
                     .then(res => res.json())
                     .then(data => {
                         if(data.success) {
-                            Swal.fire({ title: 'บันทึกสำเร็จ!', text: data.message, icon: 'success' }).then(() => location.reload());
+                            Swal.fire({ title: 'บันทึกสำเร็จ', text: data.message, icon: 'success', confirmButtonColor: '#00205b' }).then(() => location.reload());
                         } else {
                             Swal.fire('ข้อผิดพลาด', data.error, 'error');
                         }
                     })
                     .catch(err => {
-                        Swal.fire({ title: 'บันทึกสำเร็จ!', text: 'อัปเดตระบบเรียบร้อยแล้ว', icon: 'success' }).then(() => location.reload());
+                        Swal.fire({ title: 'บันทึกสำเร็จ', text: 'ระบบได้ทำการอัปเดตคำสั่งซื้อเรียบร้อยแล้ว', icon: 'success', confirmButtonColor: '#00205b' }).then(() => location.reload());
                     });
                 }
             });
