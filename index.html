@@ -26,7 +26,6 @@
         .product-link { color: #134074; text-decoration: none; transition: 0.2s; }
         .product-link:hover { color: #0b2545; text-decoration: underline; }
 
-        /* สไตล์สำหรับปุ่มสลับโหมด */
         .nav-pills .nav-link { color: #4b5563; font-weight: 600; border-radius: 10px; padding: 10px; border: 2px solid transparent; }
         .nav-pills .nav-link.active { background-color: #134074; color: white; border: 2px solid #134074; box-shadow: 0 4px 8px rgba(19, 64, 116, 0.2); }
     </style>
@@ -90,7 +89,7 @@
                 <div class="card card-elegant p-3">
                     <label class="form-label fw-bold text-dark fs-6 mb-2">🔍 สแกนบาร์โค้ดเพื่อสั่งสินค้าราคาปกติ</label>
                     <div class="input-group">
-                        <input type="number" class="form-control form-control-lg" id="normalSearchInput" placeholder="ยิงบาร์โค้ดที่นี่..." onkeypress="if(event.key==='Enter') searchNormalBarcode()">
+                        <input type="number" class="form-control form-control-lg" id="normalSearchInput" placeholder="ใส่ 14 หลัก เช่น 18853474091232" onkeypress="if(event.key==='Enter') searchNormalBarcode()">
                         <button class="btn btn-success px-3 fw-bold" onclick="searchNormalBarcode()">ค้นหา</button>
                     </div>
                     <small class="text-danger mt-2">*เฉพาะสินค้าที่มีในระบบ RMS</small>
@@ -123,7 +122,6 @@
             const branch = document.getElementById('branchSelector').value;
             if (!branch) return;
 
-            // โหลดข้อมูลทั้ง 2 ชีตพร้อมกันเลย
             Swal.fire({ title: 'กำลังโหลดข้อมูล', text: 'ดึงข้อมูลโปรโมชั่น และ RMS...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             Promise.all([
@@ -134,18 +132,17 @@
                 
                 dbPromoProducts = promoData.map((item, index) => ({...item, originalIndex: index}));
                 dbNormalProducts = normalData;
-                normalCart = []; // เคลียร์ตะกร้าปกติ
+                normalCart = []; 
                 
                 document.getElementById('orderSystemContainer').style.display = 'block';
                 document.getElementById('actionFooter').style.display = 'flex';
                 document.getElementById('normalCartSection').innerHTML = '';
                 
                 renderPromoTypeFilters();
-                switchMode('promo'); // เริ่มที่หน้าโปรโมชั่นเสมอ
+                switchMode('promo'); 
             }).catch(err => Swal.fire('เกิดข้อผิดพลาด', 'เชื่อมต่อล้มเหลว', 'error'));
         }
 
-        // ================= ควบคุมการสลับโหมด =================
         function switchMode(mode) {
             currentMode = mode;
             document.getElementById('tab-promo').classList.toggle('active', mode === 'promo');
@@ -155,7 +152,7 @@
             document.getElementById('mode-normal').style.display = (mode === 'normal') ? 'block' : 'none';
 
             if (mode === 'normal') document.getElementById('normalSearchInput').focus();
-            calculateTotal(); // อัปเดตยอดรวมด้านล่างให้ตรงกับโหมด
+            calculateActiveCount(); // รีเฟรชยอดรวม
         }
 
         // ================= โหมดโปรโมชั่น =================
@@ -173,7 +170,7 @@
         function filterByPromoType(type) {
             document.querySelectorAll('.promo-filter-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`btn_${type}`).classList.add('active');
-            document.getElementById('promoSearchInput').value = ""; // ล้างช่องค้นหา
+            document.getElementById('promoSearchInput').value = ""; 
             renderPromoList(dbPromoProducts.filter(p => p.promoType === type));
         }
 
@@ -212,7 +209,7 @@
                             </div>
                             <div class="col-4 border-start border-end">
                                 <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">ระบุ DU</div>
-                                <input type="number" class="form-control input-du-styled mx-auto" id="du_promo_${p.originalIndex}" min="0" placeholder="0" oninput="calculateTotal()">
+                                <input type="number" class="form-control input-du-styled mx-auto" id="du_promo_${p.originalIndex}" min="0" placeholder="0" oninput="updateRowTotal(this, ${p.originalIndex}, ${safeDuSize}, 'promo')">
                                 <div class="text-muted mt-1" style="font-size: 9px;">(${safeDuSize} ชิ้น/DU)</div>
                             </div>
                             <div class="col-4">
@@ -264,7 +261,7 @@
                         <div class="row align-items-center text-center g-1">
                             <div class="col-6 border-end">
                                 <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">ระบุ DU</div>
-                                <input type="number" class="form-control input-du-styled mx-auto" id="du_normal_${p.cartId}" min="0" placeholder="0" oninput="calculateTotal()">
+                                <input type="number" class="form-control input-du-styled mx-auto" id="du_normal_${p.cartId}" min="0" placeholder="0" oninput="updateRowTotal(this, ${p.cartId}, ${safeDuSize}, 'normal')">
                                 <div class="text-muted mt-1" style="font-size: 9px;">(${safeDuSize} ชิ้น/DU)</div>
                             </div>
                             <div class="col-6">
@@ -276,31 +273,29 @@
             });
         }
 
-        // ================= ระบบคำนวณและบันทึก =================
-        function calculateTotal() {
-            let activeCount = 0;
-            if (currentMode === 'promo') {
-                dbPromoProducts.forEach(p => {
-                    let el = document.getElementById(`du_promo_${p.originalIndex}`);
-                    if (el) {
-                        let safeDuSize = (p.duSize && !isNaN(p.duSize)) ? parseInt(p.duSize) : 1;
-                        document.getElementById(`total_promo_${p.originalIndex}`).innerText = (el.value * safeDuSize) || 0;
-                        if (el.value > 0) activeCount++;
-                    }
-                });
+        // ================= ระบบคำนวณแบบใหม่ (แก้ปัญหาเว็บค้าง) =================
+        function updateRowTotal(inputElement, id, duSize, mode) {
+            const val = inputElement.value || 0;
+            // เปลี่ยนยอดรวมเฉพาะกล่องที่เรากำลังพิมพ์ ไม่ต้องไปค้นหาตัวอื่นให้หนักเครื่อง
+            if (mode === 'promo') {
+                document.getElementById(`total_promo_${id}`).innerText = val * duSize;
             } else {
-                normalCart.forEach(p => {
-                    let el = document.getElementById(`du_normal_${p.cartId}`);
-                    if (el) {
-                        let safeDuSize = (p.duSize && !isNaN(p.duSize)) ? parseInt(p.duSize) : 1;
-                        document.getElementById(`total_normal_${p.cartId}`).innerText = (el.value * safeDuSize) || 0;
-                        if (el.value > 0) activeCount++;
-                    }
-                });
+                document.getElementById(`total_normal_${id}`).innerText = val * duSize;
             }
+            calculateActiveCount();
+        }
+
+        function calculateActiveCount() {
+            let activeCount = 0;
+            // นับเฉพาะรายการที่ถูกเปิดค้างไว้บนหน้าจอและมีเลขมากกว่า 0
+            const inputs = document.querySelectorAll('.input-du-styled');
+            inputs.forEach(el => {
+                if (parseFloat(el.value) > 0) activeCount++;
+            });
             document.getElementById('activeOrderCount').innerText = activeCount;
         }
 
+        // ================= บันทึกข้อมูล =================
         function processSubmit() {
             const branch = document.getElementById('branchSelector').value;
             const orders = [];
