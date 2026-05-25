@@ -63,10 +63,10 @@
             
             <ul class="nav nav-pills nav-fill gap-2 mb-3 bg-white p-2 rounded-3 shadow-sm">
                 <li class="nav-item">
-                    <button class="nav-link active w-100" id="tab-promo" onclick="switchMode('promo')">🎁 สั่งสินค้าโปรโมชั่น</button>
+                    <button class="nav-link active w-100" id="tab-promo" onclick="switchMode('promo')">สั่งสินค้าโปรโมชั่น</button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link w-100" id="tab-normal" onclick="switchMode('normal')">📦 สั่งสินค้าราคาปกติ</button>
+                    <button class="nav-link w-100" id="tab-normal" onclick="switchMode('normal')">สั่งสินค้าราคาปกติ</button>
                 </li>
             </ul>
 
@@ -158,13 +158,15 @@
         // ================= โหมดโปรโมชั่น =================
         function renderPromoTypeFilters() {
             const grid = document.getElementById('promoTypeButtonGrid');
-            grid.innerHTML = '';
             const counts = {};
             dbPromoProducts.forEach(p => counts[p.promoType] = (counts[p.promoType] || 0) + 1);
 
+            // 🟢 แก้อาการกระตุก: สร้าง HTML string ให้เสร็จก่อนค่อยนำไปใส่
+            let htmlContent = '';
             Object.keys(counts).forEach(type => {
-                grid.innerHTML += `<div class="col-6 col-md-3"><div class="promo-filter-btn" id="btn_${type}" onclick="filterByPromoType('${type}')">${type}<div class="red-badge-corner">${counts[type]}</div></div></div>`;
+                htmlContent += `<div class="col-6 col-md-3"><div class="promo-filter-btn" id="btn_${type}" onclick="filterByPromoType('${type}')">${type}<div class="red-badge-corner">${counts[type]}</div></div></div>`;
             });
+            grid.innerHTML = htmlContent;
         }
 
         function filterByPromoType(type) {
@@ -188,10 +190,18 @@
 
         function renderPromoList(products) {
             const listSection = document.getElementById('promoListSection');
-            listSection.innerHTML = ''; 
+            
+            // 🟢 แก้อาการกระตุก: สร้าง HTML string รวดเดียวให้เสร็จก่อน
+            let htmlContent = '';
             products.forEach((p) => {
                 const safeDuSize = (p.duSize && !isNaN(p.duSize)) ? parseInt(p.duSize) : 1;
-                listSection.innerHTML += `
+                
+                // ดึงค่าเก่าที่พิมพ์ค้างไว้มาแสดง (ถ้ามี)
+                const existingInput = document.getElementById(`du_promo_${p.originalIndex}`);
+                const existingVal = existingInput ? existingInput.value : '';
+                const existingTotal = existingInput ? (existingInput.value * safeDuSize) : 0;
+
+                htmlContent += `
                     <div class="product-mobile-card">
                         <div class="mb-2">
                             <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="fw-bold fs-6 lh-sm mb-1 d-inline-block product-link">${p.name}</a>
@@ -209,16 +219,17 @@
                             </div>
                             <div class="col-4 border-start border-end">
                                 <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">ระบุ DU</div>
-                                <input type="number" class="form-control input-du-styled mx-auto" id="du_promo_${p.originalIndex}" min="0" placeholder="0" oninput="updateRowTotal(this, ${p.originalIndex}, ${safeDuSize}, 'promo')">
+                                <input type="number" class="form-control input-du-styled mx-auto" id="du_promo_${p.originalIndex}" min="0" placeholder="0" value="${existingVal}" oninput="updateRowTotal(this, ${p.originalIndex}, ${safeDuSize}, 'promo')">
                                 <div class="text-muted mt-1" style="font-size: 9px;">(${safeDuSize} ชิ้น/DU)</div>
                             </div>
                             <div class="col-4">
                                 <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">รวมชิ้นสั่ง</div>
-                                <div class="fw-bold text-primary" style="font-size: 20px;" id="total_promo_${p.originalIndex}">0</div>
+                                <div class="fw-bold text-primary" style="font-size: 20px;" id="total_promo_${p.originalIndex}">${existingTotal}</div>
                             </div>
                         </div>
                     </div>`;
             });
+            listSection.innerHTML = htmlContent;
         }
 
         // ================= โหมดราคาปกติ (RMS) =================
@@ -246,11 +257,18 @@
 
         function renderNormalCart() {
             const cartSection = document.getElementById('normalCartSection');
-            cartSection.innerHTML = '';
             
+            // 🟢 แก้อาการกระตุก: สร้าง HTML string รวดเดียว
+            let htmlContent = '';
             [...normalCart].reverse().forEach((p) => {
                 const safeDuSize = (p.duSize && !isNaN(p.duSize)) ? parseInt(p.duSize) : 1;
-                cartSection.innerHTML += `
+                
+                // เก็บค่าเดิมที่พิมพ์ไว้ไม่ให้หาย
+                const existingInput = document.getElementById(`du_normal_${p.cartId}`);
+                const existingVal = existingInput ? existingInput.value : '';
+                const existingTotal = existingInput ? (existingInput.value * safeDuSize) : 0;
+
+                htmlContent += `
                     <div class="product-mobile-card border-success border-2">
                         <div class="mb-2">
                             <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="fw-bold fs-6 lh-sm mb-1 d-inline-block product-link">${p.name}</a>
@@ -261,22 +279,22 @@
                         <div class="row align-items-center text-center g-1">
                             <div class="col-6 border-end">
                                 <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">ระบุ DU</div>
-                                <input type="number" class="form-control input-du-styled mx-auto" id="du_normal_${p.cartId}" min="0" placeholder="0" oninput="updateRowTotal(this, ${p.cartId}, ${safeDuSize}, 'normal')">
+                                <input type="number" class="form-control input-du-styled mx-auto" id="du_normal_${p.cartId}" min="0" placeholder="0" value="${existingVal}" oninput="updateRowTotal(this, ${p.cartId}, ${safeDuSize}, 'normal')">
                                 <div class="text-muted mt-1" style="font-size: 9px;">(${safeDuSize} ชิ้น/DU)</div>
                             </div>
                             <div class="col-6">
                                 <div class="text-dark mb-1" style="font-size: 10px; font-weight: 600;">รวมชิ้นสั่ง</div>
-                                <div class="fw-bold text-success" style="font-size: 24px;" id="total_normal_${p.cartId}">0</div>
+                                <div class="fw-bold text-success" style="font-size: 24px;" id="total_normal_${p.cartId}">${existingTotal}</div>
                             </div>
                         </div>
                     </div>`;
             });
+            cartSection.innerHTML = htmlContent;
         }
 
-        // ================= ระบบคำนวณแบบใหม่ (แก้ปัญหาเว็บค้าง) =================
+        // ================= ระบบคำนวณ =================
         function updateRowTotal(inputElement, id, duSize, mode) {
             const val = inputElement.value || 0;
-            // เปลี่ยนยอดรวมเฉพาะกล่องที่เรากำลังพิมพ์ ไม่ต้องไปค้นหาตัวอื่นให้หนักเครื่อง
             if (mode === 'promo') {
                 document.getElementById(`total_promo_${id}`).innerText = val * duSize;
             } else {
@@ -287,7 +305,6 @@
 
         function calculateActiveCount() {
             let activeCount = 0;
-            // นับเฉพาะรายการที่ถูกเปิดค้างไว้บนหน้าจอและมีเลขมากกว่า 0
             const inputs = document.querySelectorAll('.input-du-styled');
             inputs.forEach(el => {
                 if (parseFloat(el.value) > 0) activeCount++;
