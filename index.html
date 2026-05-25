@@ -5,45 +5,210 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AM404 ระบบสั่งสินค้า</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <style>
-        body { font-family: 'Noto Sans Thai', sans-serif; background-color: #f4f6f9; color: #333; padding-bottom: 90px; }
-        .header-main { background: #00205b; color: white; padding: 18px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000;}
-        .card-elegant { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e9ecef; margin-bottom: 20px; }
-        
-        .promo-filter-btn { background: white; border: 1px solid #ced4da; border-radius: 6px; padding: 10px 8px; text-align: center; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #495057; font-size: 14px; position: relative;}
-        .promo-filter-btn:hover { border-color: #00205b; background-color: #f8f9fa; }
-        .promo-filter-btn.active { background-color: #00205b; border-color: #00205b; color: white; }
-        .red-badge-corner { position: absolute; top: -6px; right: -6px; background-color: #dc3545; color: white; font-size: 10px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        
-        .product-mobile-card { background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 15px; padding: 15px; border: 1px solid #e9ecef; }
-        .input-du-styled { width: 100%; max-width: 80px; text-align: center; font-weight: 600; border: 1px solid #ced4da; border-radius: 6px; padding: 6px; font-size: 15px;}
-        .input-du-styled:focus { border-color: #00205b; box-shadow: 0 0 0 0.2rem rgba(0,32,91,0.25); outline: none; }
-        
-        .sticky-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1010; border-top: 1px solid #dee2e6;}
-        
-        .product-link { color: #004085; text-decoration: underline; transition: 0.2s; font-weight: 600; }
-        .product-link:hover { color: #00205b; text-decoration: none; }
 
-        .nav-pills .nav-link { color: #495057; font-weight: 600; border-radius: 6px; padding: 10px; border: 1px solid #dee2e6; background-color: #f8f9fa;}
-        .nav-pills .nav-link.active { background-color: #00205b; color: white; border: 1px solid #00205b; }
-        .form-label { font-weight: 600; color: #212529; }
+    <style>
+        :root {
+            --brand: #00205b;
+            --brand-2: #0a3a8f;
+            --brand-soft: #eaf0ff;
+            --accent: #e63946;
+            --success: #1e8e5a;
+            --ink: #1f2a44;
+            --muted: #6b7280;
+            --line: #e7eaf0;
+            --bg: #f3f5fa;
+            --radius: 14px;
+            --shadow-sm: 0 1px 3px rgba(16, 24, 40, .06), 0 1px 2px rgba(16, 24, 40, .04);
+            --shadow-md: 0 8px 24px rgba(16, 24, 40, .08);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            padding-bottom: 96px;
+        }
+
+        /* ---------- Header ---------- */
+        .header-main {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+            color: #fff;
+            padding: 16px 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-main .brand-logo {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .15);
+            display: inline-flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 15px; letter-spacing: .5px;
+        }
+        .header-main .brand-title { font-weight: 700; font-size: 17px; line-height: 1.1; }
+        .header-main .brand-sub { font-size: 11px; opacity: .8; font-weight: 400; }
+
+        /* ---------- Cards ---------- */
+        .card-elegant {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--line);
+            margin-bottom: 18px;
+        }
+        .section-title { font-weight: 700; font-size: 15px; color: var(--ink); }
+
+        /* ---------- Form controls ---------- */
+        .form-label { font-weight: 600; color: var(--ink); font-size: 14px; }
+        .form-select, .form-control {
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            font-size: 15px;
+            padding: 11px 14px;
+        }
+        .form-select:focus, .form-control:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 .2rem rgba(0, 32, 91, .12);
+        }
+        .btn { border-radius: 10px; font-weight: 600; }
+        .btn-brand { background: var(--brand); border: 1px solid var(--brand); color: #fff; }
+        .btn-brand:hover { background: var(--brand-2); color: #fff; }
+
+        /* ---------- Promo filter buttons ---------- */
+        .promo-filter-btn {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 14px 8px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .18s ease;
+            color: var(--ink);
+            font-size: 14px;
+            position: relative;
+            height: 100%;
+        }
+        .promo-filter-btn:hover { border-color: var(--brand); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+        .promo-filter-btn.active {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+            border-color: var(--brand);
+            color: #fff;
+        }
+        .red-badge-corner {
+            position: absolute; top: -8px; right: -8px;
+            background: var(--accent); color: #fff;
+            font-size: 11px; font-weight: 700;
+            min-width: 22px; height: 22px; padding: 0 5px;
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 6px rgba(230, 57, 70, .4);
+        }
+
+        /* ---------- Product cards ---------- */
+        .product-mobile-card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 14px;
+            padding: 16px;
+            border: 1px solid var(--line);
+            transition: box-shadow .18s ease;
+        }
+        .product-mobile-card:hover { box-shadow: var(--shadow-md); }
+        .product-mobile-card.is-active { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(0, 32, 91, .08); }
+        .product-mobile-card.card-normal { border-left: 4px solid var(--brand); }
+
+        .product-name { color: var(--brand); font-weight: 700; font-size: 15px; text-decoration: none; line-height: 1.35; }
+        .product-name:hover { text-decoration: underline; }
+        .meta-text { color: var(--muted); font-size: 11.5px; }
+
+        .input-du-styled {
+            width: 100%; max-width: 90px;
+            text-align: center; font-weight: 700;
+            border: 1px solid var(--line); border-radius: 10px;
+            padding: 8px; font-size: 16px;
+        }
+        .input-du-styled:focus { border-color: var(--brand); box-shadow: 0 0 0 .2rem rgba(0, 32, 91, .12); outline: none; }
+
+        .qty-box { background: #f8f9fc; border-radius: 12px; padding: 10px 6px; }
+        .label-tiny { font-size: 11px; font-weight: 600; color: var(--muted); }
+
+        /* ---------- Tabs ---------- */
+        .nav-pills .nav-link {
+            color: var(--ink); font-weight: 600;
+            border-radius: 12px; padding: 11px 8px;
+            border: 1px solid var(--line); background: #fff;
+            font-size: 14px; transition: all .18s ease;
+        }
+        .nav-pills .nav-link:hover { border-color: var(--brand); }
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+            color: #fff; border-color: var(--brand);
+        }
+        .nav-pills .nav-link .tab-count {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 20px; height: 20px; padding: 0 5px; margin-left: 5px;
+            font-size: 11px; border-radius: 10px;
+            background: var(--accent); color: #fff; font-weight: 700;
+        }
+
+        /* ---------- Sticky footer ---------- */
+        .sticky-action-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(255, 255, 255, .92);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 -4px 16px rgba(16, 24, 40, .08);
+            padding: 12px 18px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1010; border-top: 1px solid var(--line);
+        }
+        .footer-stat .num { font-size: 22px; font-weight: 800; color: var(--brand); line-height: 1; }
+        .footer-stat .lbl { font-size: 11px; font-weight: 500; color: var(--muted); }
+
+        /* ---------- Summary ---------- */
+        .summary-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 0; border-bottom: 1px dashed var(--line);
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-qty-badge {
+            min-width: 56px; text-align: center;
+            background: var(--brand-soft); color: var(--brand);
+            border-radius: 10px; padding: 6px 4px; font-weight: 800; font-size: 16px;
+        }
+        .grand-total-card {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+            color: #fff; border-radius: var(--radius); padding: 18px;
+        }
+        .empty-state { text-align: center; color: var(--muted); padding: 48px 16px; }
+        .empty-state svg { opacity: .35; }
+
+        .fade-in { animation: fadeIn .25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     </style>
 </head>
 <body>
 
-    <div class="header-main text-center mb-4">
-        <div class="container">
-            <h5 class="fw-bold mb-0">AM404 ระบบสั่งสินค้า</h5>
+    <header class="header-main mb-4">
+        <div class="container d-flex align-items-center gap-3">
+            <span class="brand-logo">AM</span>
+            <div>
+                <div class="brand-title">AM404 ระบบสั่งสินค้า</div>
+                <div class="brand-sub">Order Management System</div>
+            </div>
         </div>
-    </div>
+    </header>
 
-    <div class="container px-3">
+    <main class="container px-3">
         <div class="card card-elegant p-3">
-            <label class="form-label fs-6 mb-2">กรุณาเลือกรหัสสาขา</label>
-            <select class="form-select" style="font-size: 15px;" id="branchSelector" onchange="onBranchSelected()">
+            <label class="form-label mb-2" for="branchSelector">เลือกรหัสสาขา</label>
+            <select class="form-select" id="branchSelector" onchange="onBranchSelected()">
                 <option value="" selected disabled>--- คลิกเพื่อเลือกสาขา ---</option>
                 <option value="730 - Piean - Pin 2">730 - Piean - Pin 2</option>
                 <option value="5209 - Soi Kusolsin">5209 - Soi Kusolsin</option>
@@ -62,26 +227,29 @@
         </div>
 
         <div id="orderSystemContainer" style="display: none;">
-            
+
             <ul class="nav nav-pills nav-fill gap-2 mb-3">
                 <li class="nav-item">
-                    <button class="nav-link active w-100 shadow-sm" id="tab-promo" onclick="switchMode('promo')">สั่งสินค้าโปรโมชั่น</button>
+                    <button class="nav-link active w-100" id="tab-promo" onclick="switchMode('promo')">สั่งสินค้าโปรโมชั่น</button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link w-100 shadow-sm" id="tab-normal" onclick="switchMode('normal')">สั่งสินค้าราคาปกติ</button>
+                    <button class="nav-link w-100" id="tab-normal" onclick="switchMode('normal')">สั่งสินค้าราคาปกติ</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link w-100" id="tab-summary" onclick="switchMode('summary')">สรุปคำสั่งซื้อ<span class="tab-count" id="summaryTabCount" style="display:none;">0</span></button>
                 </li>
             </ul>
 
             <div id="mode-promo">
                 <div class="card card-elegant p-3" id="promoFilterSection">
-                    <label class="form-label fs-6 mb-2">ค้นหาสินค้าโปรโมชั่นด้วยบาร์โค้ด</label>
+                    <label class="form-label mb-2" for="promoSearchInput">ค้นหาสินค้าโปรโมชั่นด้วยบาร์โค้ด</label>
                     <div class="input-group mb-3">
                         <input type="number" class="form-control" id="promoSearchInput" placeholder="กรอกบาร์โค้ด..." onkeypress="if(event.key==='Enter') searchPromoBarcode()">
-                        <button class="btn btn-secondary px-3" onclick="searchPromoBarcode()">ค้นหา</button>
+                        <button class="btn btn-brand px-3" onclick="searchPromoBarcode()">ค้นหา</button>
                     </div>
-                    <hr class="my-2" style="border-color: #dee2e6;">
-                    <label class="form-label fs-6 mb-2">หรือเลือกจาก Promotion Type</label>
-                    <div class="row g-2" id="promoTypeButtonGrid"></div>
+                    <hr class="my-2" style="border-color: var(--line);">
+                    <label class="form-label mb-2">หรือเลือกจาก Promotion Type</label>
+                    <div class="row g-3" id="promoTypeButtonGrid"></div>
                 </div>
 
                 <div id="promoListSection"></div>
@@ -89,274 +257,414 @@
 
             <div id="mode-normal" style="display: none;">
                 <div class="card card-elegant p-3">
-                    <label class="form-label fs-6 mb-2">ค้นหาสินค้าราคาปกติด้วยบาร์โค้ด</label>
+                    <label class="form-label mb-2" for="normalSearchInput">ค้นหาสินค้าราคาปกติด้วยบาร์โค้ด</label>
                     <div class="input-group">
                         <input type="number" class="form-control" id="normalSearchInput" placeholder="ใส่ 13 หลัก เช่น 8851932426077" onkeypress="if(event.key==='Enter') searchNormalBarcode()">
-                        <button class="btn btn-secondary px-3" onclick="searchNormalBarcode()">ค้นหา</button>
+                        <button class="btn btn-brand px-3" onclick="searchNormalBarcode()">ค้นหา</button>
                     </div>
                     <small class="text-muted mt-2 d-block">*ระบบจะค้นหาจากฐานข้อมูล RMS</small>
                 </div>
 
                 <div id="normalCartSection"></div>
             </div>
+
+            <div id="mode-summary" style="display: none;"></div>
         </div>
-    </div>
+    </main>
 
     <div class="sticky-action-bar" id="actionFooter" style="display: none;">
-        <div>
-            <div class="text-secondary" style="font-size: 12px; font-weight: 500;">จำนวนรายการสั่งซื้อ</div>
-            <h5 class="fw-bold mb-0 text-dark"><span id="activeOrderCount" class="text-primary">0</span> รายการ</h5>
+        <div class="footer-stat">
+            <div class="num"><span id="activeOrderCount">0</span> <span style="font-size:14px;font-weight:600;">รายการ</span></div>
+            <div class="lbl">รวม <span id="activePieceCount">0</span> ชิ้น</div>
         </div>
-        <button class="btn btn-primary fw-bold px-4 py-2" onclick="processSubmit()">
+        <button class="btn btn-brand fw-bold px-4 py-2" onclick="processSubmit()">
             บันทึกคำสั่งซื้อ
         </button>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxdbBQAGR5PxeJleVBJ5ipFimx-CmjXSvDAY_pD3RSfaY4b61hIiZkPpGnyrKwvdqHU/exec"; 
-        
-        let currentMode = "promo"; 
-        let dbPromoProducts = [];
-        let dbNormalProducts = [];
-        let normalCart = [];
+        "use strict";
 
+        const API_URL = "https://script.google.com/macros/s/AKfycbxdbBQAGR5PxeJleVBJ5ipFimx-CmjXSvDAY_pD3RSfaY4b61hIiZkPpGnyrKwvdqHU/exec";
+
+        const BRAND = "#00205b";
+
+        // ---------- Application state (single source of truth) ----------
+        const state = {
+            mode: "promo",
+            promoProducts: [],   // [{...item, originalIndex}]
+            normalProducts: [],  // raw RMS catalog
+            promoQty: {},        // originalIndex -> DU quantity (string)
+            normalCart: []       // [{...item, cartId, duQty}]
+        };
+
+        // ---------- Utilities ----------
+        const $ = (id) => document.getElementById(id);
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function duSizeOf(product) {
+            const n = parseInt(product.duSize, 10);
+            return Number.isFinite(n) && n > 0 ? n : 1;
+        }
+
+        function imageSearchUrl(barcode) {
+            return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(barcode)}`;
+        }
+
+        function formatDate(value) {
+            const d = new Date(value);
+            return isNaN(d) ? "-" : d.toLocaleDateString("th-TH");
+        }
+
+        // ---------- Branch loading ----------
         function onBranchSelected() {
-            const branch = document.getElementById('branchSelector').value;
+            const branch = $("branchSelector").value;
             if (!branch) return;
 
-            Swal.fire({ title: 'กำลังโหลดข้อมูล', text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: "กำลังโหลดข้อมูล", text: "กรุณารอสักครู่...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             Promise.all([
                 fetch(`${API_URL}?action=getProducts&branch=${encodeURIComponent(branch)}`).then(res => res.json()),
                 fetch(`${API_URL}?action=getRMSProducts&branch=${encodeURIComponent(branch)}`).then(res => res.json())
             ]).then(([promoData, normalData]) => {
                 Swal.close();
-                
-                dbPromoProducts = promoData.map((item, index) => ({...item, originalIndex: index}));
-                dbNormalProducts = normalData;
-                normalCart = []; 
-                
-                document.getElementById('orderSystemContainer').style.display = 'block';
-                document.getElementById('actionFooter').style.display = 'flex';
-                document.getElementById('normalCartSection').innerHTML = '';
-                
+
+                state.promoProducts = promoData.map((item, index) => ({ ...item, originalIndex: index }));
+                state.normalProducts = normalData;
+                state.promoQty = {};
+                state.normalCart = [];
+
+                $("orderSystemContainer").style.display = "block";
+                $("actionFooter").style.display = "flex";
+                $("normalCartSection").innerHTML = "";
+                $("promoListSection").innerHTML = "";
+
                 renderPromoTypeFilters();
-                switchMode('promo'); 
-            }).catch(err => Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error'));
+                switchMode("promo");
+            }).catch(() => Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้", "error"));
         }
 
+        // ---------- Tab switching ----------
         function switchMode(mode) {
-            currentMode = mode;
-            document.getElementById('tab-promo').classList.toggle('active', mode === 'promo');
-            document.getElementById('tab-normal').classList.toggle('active', mode === 'normal');
-            
-            document.getElementById('mode-promo').style.display = (mode === 'promo') ? 'block' : 'none';
-            document.getElementById('mode-normal').style.display = (mode === 'normal') ? 'block' : 'none';
+            state.mode = mode;
+            $("tab-promo").classList.toggle("active", mode === "promo");
+            $("tab-normal").classList.toggle("active", mode === "normal");
+            $("tab-summary").classList.toggle("active", mode === "summary");
 
-            if (mode === 'normal') document.getElementById('normalSearchInput').focus();
-            calculateActiveCount(); 
+            $("mode-promo").style.display = mode === "promo" ? "block" : "none";
+            $("mode-normal").style.display = mode === "normal" ? "block" : "none";
+            $("mode-summary").style.display = mode === "summary" ? "block" : "none";
+
+            if (mode === "normal") $("normalSearchInput").focus();
+            if (mode === "summary") renderSummary();
+            refreshCounts();
         }
 
         // ================= โหมดโปรโมชั่น =================
         function renderPromoTypeFilters() {
-            const grid = document.getElementById('promoTypeButtonGrid');
+            const grid = $("promoTypeButtonGrid");
             const counts = {};
-            dbPromoProducts.forEach(p => counts[p.promoType] = (counts[p.promoType] || 0) + 1);
+            state.promoProducts.forEach(p => { counts[p.promoType] = (counts[p.promoType] || 0) + 1; });
 
-            let htmlContent = '';
-            Object.keys(counts).forEach(type => {
-                htmlContent += `<div class="col-6 col-md-3"><div class="promo-filter-btn shadow-sm" id="btn_${type}" onclick="filterByPromoType('${type}')">${type}<div class="red-badge-corner">${counts[type]}</div></div></div>`;
-            });
-            grid.innerHTML = htmlContent;
+            grid.innerHTML = Object.keys(counts).map(type => `
+                <div class="col-6 col-md-3">
+                    <div class="promo-filter-btn" data-type="${escapeHtml(type)}" onclick="filterByPromoType('${escapeHtml(type)}')">
+                        ${escapeHtml(type)}
+                        <div class="red-badge-corner">${counts[type]}</div>
+                    </div>
+                </div>`).join("");
         }
 
         function filterByPromoType(type) {
-            document.querySelectorAll('.promo-filter-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn_${type}`).classList.add('active');
-            document.getElementById('promoSearchInput').value = ""; 
-            renderPromoList(dbPromoProducts.filter(p => p.promoType === type));
+            document.querySelectorAll(".promo-filter-btn").forEach(b => b.classList.toggle("active", b.dataset.type === type));
+            $("promoSearchInput").value = "";
+            renderPromoList(state.promoProducts.filter(p => p.promoType === type));
         }
 
         function searchPromoBarcode() {
-            const barcode = document.getElementById('promoSearchInput').value.trim();
+            const barcode = $("promoSearchInput").value.trim();
             if (!barcode) return;
-            const found = dbPromoProducts.filter(p => p.barcode === barcode);
+            const found = state.promoProducts.filter(p => p.barcode === barcode);
             if (found.length > 0) {
-                document.querySelectorAll('.promo-filter-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll(".promo-filter-btn").forEach(b => b.classList.remove("active"));
                 renderPromoList(found);
             } else {
-                Swal.fire('ไม่พบข้อมูล', `ไม่มีสินค้ารหัส ${barcode} ในโปรโมชั่นรอบนี้`, 'warning');
+                Swal.fire("ไม่พบข้อมูล", `ไม่มีสินค้ารหัส ${escapeHtml(barcode)} ในโปรโมชั่นรอบนี้`, "warning");
             }
         }
 
         function renderPromoList(products) {
-            const listSection = document.getElementById('promoListSection');
-            let htmlContent = '';
-            products.forEach((p) => {
-                const safeDuSize = (p.duSize && !isNaN(p.duSize)) ? parseInt(p.duSize) : 1;
-                const existingInput = document.getElementById(`du_promo_${p.originalIndex}`);
-                const existingVal = existingInput ? existingInput.value : '';
-                const existingTotal = existingInput ? (existingInput.value * safeDuSize) : 0;
-
-                htmlContent += `
-                    <div class="product-mobile-card">
-                        <div class="mb-2">
-                            <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="product-link d-inline-block mb-1">${p.name}</a>
-                            <div class="text-secondary mb-2" style="font-size: 11px;">Barcode: ${p.barcode} | Group: ${p.group}</div>
-                            <div class="d-flex gap-1 flex-wrap">
-                                <span class="badge bg-secondary" style="font-weight: 500;">รอบ: ${new Date(p.startDate).toLocaleDateString('th-TH')} - ${new Date(p.endDate).toLocaleDateString('th-TH')}</span>
-                                <span class="badge bg-danger" style="font-weight: 500;">โปร: ${p.promotionDesc}</span>
-                            </div>
+            $("promoListSection").innerHTML = products.map(p => {
+                const du = duSizeOf(p);
+                const qty = state.promoQty[p.originalIndex] || "";
+                const total = (parseFloat(qty) || 0) * du;
+                const active = total > 0 ? " is-active" : "";
+                return `
+                    <div class="product-mobile-card${active} fade-in" id="card_promo_${p.originalIndex}">
+                        <a href="${imageSearchUrl(p.barcode)}" target="_blank" rel="noopener" class="product-name">${escapeHtml(p.name)}</a>
+                        <div class="meta-text mt-1">Barcode: ${escapeHtml(p.barcode)} • Group: ${escapeHtml(p.group)}</div>
+                        <div class="d-flex gap-1 flex-wrap mt-2">
+                            <span class="badge bg-secondary fw-normal">รอบ: ${formatDate(p.startDate)} - ${formatDate(p.endDate)}</span>
+                            <span class="badge bg-danger fw-normal">โปร: ${escapeHtml(p.promotionDesc)}</span>
                         </div>
-                        <hr class="my-3" style="border-color: #dee2e6;">
+                        <hr class="my-3" style="border-color: var(--line);">
                         <div class="row align-items-center text-center g-2">
                             <div class="col-4">
-                                <div class="text-muted" style="font-size: 11px; text-decoration: line-through;">ปกติ ฿${p.normalPrice}</div>
-                                <div class="text-success fw-bold" style="font-size: 15px;">โปร ฿${p.promoPrice}</div>
-                            </div>
-                            <div class="col-4 border-start border-end">
-                                <div class="text-dark mb-1" style="font-size: 11px; font-weight: 600;">ระบุ DU</div>
-                                <input type="number" class="form-control input-du-styled mx-auto" id="du_promo_${p.originalIndex}" min="0" placeholder="0" value="${existingVal}" oninput="updateRowTotal(this, ${p.originalIndex}, ${safeDuSize}, 'promo')">
-                                <div class="text-muted mt-1" style="font-size: 10px;">(${safeDuSize} ชิ้น/DU)</div>
+                                <div class="meta-text text-decoration-line-through">ปกติ ฿${escapeHtml(p.normalPrice)}</div>
+                                <div class="text-success fw-bold" style="font-size:15px;">โปร ฿${escapeHtml(p.promoPrice)}</div>
                             </div>
                             <div class="col-4">
-                                <div class="text-dark mb-1" style="font-size: 11px; font-weight: 600;">รวมชิ้นสั่ง</div>
-                                <div class="fw-bold text-primary" style="font-size: 18px;" id="total_promo_${p.originalIndex}">${existingTotal}</div>
+                                <div class="qty-box">
+                                    <div class="label-tiny mb-1">ระบุ DU</div>
+                                    <input type="number" class="form-control input-du-styled mx-auto" id="du_promo_${p.originalIndex}" min="0" placeholder="0" value="${escapeHtml(qty)}" oninput="onPromoInput(${p.originalIndex}, ${du}, this.value)">
+                                    <div class="label-tiny mt-1">(${du} ชิ้น/DU)</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="label-tiny">รวมชิ้นสั่ง</div>
+                                <div class="fw-bold text-primary" style="font-size:20px;" id="total_promo_${p.originalIndex}">${total}</div>
                             </div>
                         </div>
                     </div>`;
-            });
-            listSection.innerHTML = htmlContent;
+            }).join("");
+        }
+
+        function onPromoInput(index, du, value) {
+            if (value === "" || parseFloat(value) === 0) {
+                delete state.promoQty[index];
+            } else {
+                state.promoQty[index] = value;
+            }
+            const total = (parseFloat(value) || 0) * du;
+            $(`total_promo_${index}`).innerText = total;
+            $(`card_promo_${index}`).classList.toggle("is-active", total > 0);
+            refreshCounts();
         }
 
         // ================= โหมดราคาปกติ (RMS) =================
         function searchNormalBarcode() {
-            const inputEl = document.getElementById('normalSearchInput');
+            const inputEl = $("normalSearchInput");
             const barcode = inputEl.value.trim();
             if (!barcode) return;
 
-            const foundProduct = dbNormalProducts.find(p => p.barcode === barcode);
+            const foundProduct = state.normalProducts.find(p => p.barcode === barcode);
 
             if (foundProduct) {
-                const existIndex = normalCart.findIndex(p => p.barcode === barcode);
-                if (existIndex === -1) {
-                    normalCart.push({ ...foundProduct, cartId: normalCart.length });
+                const exists = state.normalCart.some(p => p.barcode === barcode);
+                if (!exists) {
+                    state.normalCart.push({ ...foundProduct, cartId: Date.now(), duQty: "" });
                     renderNormalCart();
                 } else {
-                    Swal.fire({ title: 'สินค้านี้ถูกเลือกแล้ว', text: 'รายการอยู่ด้านล่าง โปรดแก้ไขจำนวน', icon: 'info', timer: 1500, showConfirmButton: false });
+                    Swal.fire({ title: "สินค้านี้ถูกเลือกแล้ว", text: "รายการอยู่ด้านล่าง โปรดแก้ไขจำนวน", icon: "info", timer: 1500, showConfirmButton: false });
                 }
             } else {
-                Swal.fire({ title: 'ไม่พบข้อมูล', text: `รหัส ${barcode} ไม่มีในฐานข้อมูล RMS`, icon: 'error', confirmButtonColor: '#00205b' });
+                Swal.fire({ title: "ไม่พบข้อมูล", text: `รหัส ${escapeHtml(barcode)} ไม่มีในฐานข้อมูล RMS`, icon: "error", confirmButtonColor: BRAND });
             }
             inputEl.value = "";
             inputEl.focus();
         }
 
-        function renderNormalCart() {
-            const cartSection = document.getElementById('normalCartSection');
-            let htmlContent = '';
-            [...normalCart].reverse().forEach((p) => {
-                const safeDuSize = (p.duSize && !isNaN(p.duSize)) ? parseInt(p.duSize) : 1;
-                
-                const existingInput = document.getElementById(`du_normal_${p.cartId}`);
-                const existingVal = existingInput ? existingInput.value : '';
-                const existingTotal = existingInput ? (existingInput.value * safeDuSize) : 0;
+        function removeNormalItem(cartId) {
+            state.normalCart = state.normalCart.filter(p => p.cartId !== cartId);
+            renderNormalCart();
+            refreshCounts();
+        }
 
-                htmlContent += `
-                    <div class="product-mobile-card border-start border-4 border-secondary">
-                        <div class="mb-2">
-                            <a href="https://www.google.com/search?tbm=isch&q=${p.barcode}" target="_blank" class="product-link d-inline-block mb-1">${p.name}</a>
-                            <div class="text-secondary mb-2" style="font-size: 11px;">Barcode: ${p.barcode}</div>
-                            <span class="badge bg-secondary" style="font-size: 10px; font-weight: 500;">ราคาปกติ (RMS)</span>
+        function renderNormalCart() {
+            $("normalCartSection").innerHTML = [...state.normalCart].reverse().map(p => {
+                const du = duSizeOf(p);
+                const total = (parseFloat(p.duQty) || 0) * du;
+                const active = total > 0 ? " is-active" : "";
+                return `
+                    <div class="product-mobile-card card-normal${active} fade-in">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <a href="${imageSearchUrl(p.barcode)}" target="_blank" rel="noopener" class="product-name">${escapeHtml(p.name)}</a>
+                            <button class="btn btn-sm btn-outline-danger border-0 py-0 px-2" title="ลบรายการ" onclick="removeNormalItem(${p.cartId})">&times;</button>
                         </div>
-                        <hr class="my-3" style="border-color: #dee2e6;">
+                        <div class="meta-text mt-1">Barcode: ${escapeHtml(p.barcode)}</div>
+                        <span class="badge bg-secondary fw-normal mt-1">ราคาปกติ (RMS)</span>
+                        <hr class="my-3" style="border-color: var(--line);">
                         <div class="row align-items-center text-center g-2">
-                            <div class="col-6 border-end">
-                                <div class="text-dark mb-1" style="font-size: 11px; font-weight: 600;">ระบุ DU</div>
-                                <input type="number" class="form-control input-du-styled mx-auto" id="du_normal_${p.cartId}" min="0" placeholder="0" value="${existingVal}" oninput="updateRowTotal(this, ${p.cartId}, ${safeDuSize}, 'normal')">
-                                <div class="text-muted mt-1" style="font-size: 10px;">(${safeDuSize} ชิ้น/DU)</div>
+                            <div class="col-6">
+                                <div class="qty-box">
+                                    <div class="label-tiny mb-1">ระบุ DU</div>
+                                    <input type="number" class="form-control input-du-styled mx-auto" id="du_normal_${p.cartId}" min="0" placeholder="0" value="${escapeHtml(p.duQty)}" oninput="onNormalInput(${p.cartId}, this.value)">
+                                    <div class="label-tiny mt-1">(${du} ชิ้น/DU)</div>
+                                </div>
                             </div>
                             <div class="col-6">
-                                <div class="text-dark mb-1" style="font-size: 11px; font-weight: 600;">รวมชิ้นสั่ง</div>
-                                <div class="fw-bold text-dark" style="font-size: 20px;" id="total_normal_${p.cartId}">${existingTotal}</div>
+                                <div class="label-tiny">รวมชิ้นสั่ง</div>
+                                <div class="fw-bold text-primary" style="font-size:22px;" id="total_normal_${p.cartId}">${total}</div>
                             </div>
                         </div>
                     </div>`;
-            });
-            cartSection.innerHTML = htmlContent;
+            }).join("");
         }
 
-        // ================= ระบบคำนวณและบันทึก =================
-        function updateRowTotal(inputElement, id, duSize, mode) {
-            const val = inputElement.value || 0;
-            if (mode === 'promo') {
-                document.getElementById(`total_promo_${id}`).innerText = val * duSize;
-            } else {
-                document.getElementById(`total_normal_${id}`).innerText = val * duSize;
-            }
-            calculateActiveCount();
+        function onNormalInput(cartId, value) {
+            const item = state.normalCart.find(p => p.cartId === cartId);
+            if (!item) return;
+            item.duQty = value;
+            $(`total_normal_${cartId}`).innerText = (parseFloat(value) || 0) * duSizeOf(item);
+            refreshCounts();
         }
 
-        function calculateActiveCount() {
-            let activeCount = 0;
-            const inputs = document.querySelectorAll('.input-du-styled');
-            inputs.forEach(el => {
-                if (parseFloat(el.value) > 0) activeCount++;
-            });
-            document.getElementById('activeOrderCount').innerText = activeCount;
-        }
-
-        function processSubmit() {
-            const branch = document.getElementById('branchSelector').value;
+        // ================= สรุปคำสั่งซื้อ =================
+        function collectOrders() {
             const orders = [];
 
-            if (currentMode === 'promo') {
-                dbPromoProducts.forEach(p => {
-                    let el = document.getElementById(`du_promo_${p.originalIndex}`);
-                    if (el && el.value > 0) {
-                        orders.push({ product: p, duQty: el.value, totalQty: document.getElementById(`total_promo_${p.originalIndex}`).innerText });
-                    }
-                });
-            } else {
-                normalCart.forEach(p => {
-                    let el = document.getElementById(`du_normal_${p.cartId}`);
-                    if (el && el.value > 0) {
-                        orders.push({ 
-                            product: { barcode: p.barcode, name: p.name, duSize: p.duSize }, 
-                            duQty: el.value, 
-                            totalQty: document.getElementById(`total_normal_${p.cartId}`).innerText 
-                        });
-                    }
-                });
-            }
-
-            if (orders.length === 0) return Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณาระบุจำนวนสินค้าที่ต้องการสั่งซื้อก่อนทำการบันทึก', 'warning');
-
-            Swal.fire({
-                title: 'ยืนยันการบันทึก',
-                text: `คุณต้องการบันทึกคำสั่งซื้อ จำนวน ${orders.length} รายการ ใช่หรือไม่?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#00205b',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonText: 'ยืนยัน'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({ title: 'กำลังบันทึกข้อมูล', text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                    const payloadData = JSON.stringify({ branch: branch, orders: orders });
-                    fetch(`${API_URL}?action=saveOrder&branch=${encodeURIComponent(branch)}&payload=${encodeURIComponent(payloadData)}`, { method: 'GET', redirect: 'follow' })
-                    .then(res => res.json())
-                    .then(data => {
-                        if(data.success) {
-                            Swal.fire({ title: 'บันทึกสำเร็จ', text: data.message, icon: 'success', confirmButtonColor: '#00205b' }).then(() => location.reload());
-                        } else {
-                            Swal.fire('ข้อผิดพลาด', data.error, 'error');
-                        }
-                    })
-                    .catch(err => {
-                        Swal.fire({ title: 'บันทึกสำเร็จ', text: 'ระบบได้ทำการอัปเดตคำสั่งซื้อเรียบร้อยแล้ว', icon: 'success', confirmButtonColor: '#00205b' }).then(() => location.reload());
+            state.promoProducts.forEach(p => {
+                const duQty = parseFloat(state.promoQty[p.originalIndex]) || 0;
+                if (duQty > 0) {
+                    orders.push({
+                        type: "promo",
+                        product: p,
+                        name: p.name,
+                        barcode: p.barcode,
+                        duQty,
+                        duSize: duSizeOf(p),
+                        totalQty: duQty * duSizeOf(p)
                     });
                 }
+            });
+
+            state.normalCart.forEach(p => {
+                const duQty = parseFloat(p.duQty) || 0;
+                if (duQty > 0) {
+                    orders.push({
+                        type: "normal",
+                        product: { barcode: p.barcode, name: p.name, duSize: p.duSize },
+                        name: p.name,
+                        barcode: p.barcode,
+                        duQty,
+                        duSize: duSizeOf(p),
+                        totalQty: duQty * duSizeOf(p)
+                    });
+                }
+            });
+
+            return orders;
+        }
+
+        function renderSummary() {
+            const orders = collectOrders();
+            const container = $("mode-summary");
+            const branch = $("branchSelector").value;
+
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <div class="card card-elegant fade-in">
+                        <div class="empty-state">
+                            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 4.6A1 1 0 0 0 5.6 19H19"/><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg>
+                            <div class="mt-3 fw-semibold">ยังไม่มีรายการสั่งซื้อ</div>
+                            <div class="small mt-1">กรุณาเลือกสินค้าและระบุจำนวนในแท็บโปรโมชั่นหรือราคาปกติ</div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            const promoOrders = orders.filter(o => o.type === "promo");
+            const normalOrders = orders.filter(o => o.type === "normal");
+            const totalPieces = orders.reduce((sum, o) => sum + o.totalQty, 0);
+
+            const renderGroup = (title, items, accent) => {
+                if (items.length === 0) return "";
+                const rows = items.map(o => `
+                    <div class="summary-row">
+                        <div class="summary-qty-badge">${o.totalQty}<div class="label-tiny" style="color:inherit;opacity:.7;">ชิ้น</div></div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold" style="font-size:14px;line-height:1.3;">${escapeHtml(o.name)}</div>
+                            <div class="meta-text">${escapeHtml(o.barcode)} • ${o.duQty} DU × ${o.duSize} ชิ้น</div>
+                        </div>
+                    </div>`).join("");
+                return `
+                    <div class="card card-elegant p-3 fade-in">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="section-title"><span class="badge ${accent} me-1">${items.length}</span> ${title}</span>
+                        </div>
+                        ${rows}
+                    </div>`;
+            };
+
+            container.innerHTML = `
+                <div class="card card-elegant p-3 fade-in">
+                    <div class="label-tiny">สาขาที่สั่งซื้อ</div>
+                    <div class="fw-bold" style="color:var(--brand);font-size:16px;">${escapeHtml(branch)}</div>
+                </div>
+                ${renderGroup("สินค้าโปรโมชั่น", promoOrders, "bg-danger")}
+                ${renderGroup("สินค้าราคาปกติ (RMS)", normalOrders, "bg-secondary")}
+                <div class="grand-total-card fade-in d-flex justify-content-between align-items-center">
+                    <div>
+                        <div style="font-size:12px;opacity:.85;">รวมทั้งหมด</div>
+                        <div style="font-size:22px;font-weight:800;">${orders.length} รายการ</div>
+                    </div>
+                    <div class="text-end">
+                        <div style="font-size:12px;opacity:.85;">จำนวนชิ้นรวม</div>
+                        <div style="font-size:22px;font-weight:800;">${totalPieces} ชิ้น</div>
+                    </div>
+                </div>`;
+        }
+
+        // ================= ตัวนับ / Footer =================
+        function refreshCounts() {
+            const orders = collectOrders();
+            const totalPieces = orders.reduce((sum, o) => sum + o.totalQty, 0);
+            $("activeOrderCount").innerText = orders.length;
+            $("activePieceCount").innerText = totalPieces;
+
+            const tabCount = $("summaryTabCount");
+            tabCount.innerText = orders.length;
+            tabCount.style.display = orders.length > 0 ? "inline-flex" : "none";
+        }
+
+        // ================= บันทึกคำสั่งซื้อ =================
+        function processSubmit() {
+            const branch = $("branchSelector").value;
+            const collected = collectOrders();
+
+            if (collected.length === 0) {
+                return Swal.fire("ข้อมูลไม่ครบถ้วน", "กรุณาระบุจำนวนสินค้าที่ต้องการสั่งซื้อก่อนทำการบันทึก", "warning");
+            }
+
+            const orders = collected.map(o => ({
+                product: o.product,
+                duQty: String(o.duQty),
+                totalQty: String(o.totalQty)
+            }));
+
+            Swal.fire({
+                title: "ยืนยันการบันทึก",
+                text: `คุณต้องการบันทึกคำสั่งซื้อ จำนวน ${orders.length} รายการ ใช่หรือไม่?`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: BRAND,
+                cancelButtonText: "ยกเลิก",
+                confirmButtonText: "ยืนยัน"
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+
+                Swal.fire({ title: "กำลังบันทึกข้อมูล", text: "กรุณารอสักครู่...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                const payloadData = JSON.stringify({ branch, orders });
+                fetch(`${API_URL}?action=saveOrder&branch=${encodeURIComponent(branch)}&payload=${encodeURIComponent(payloadData)}`, { method: "GET", redirect: "follow" })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({ title: "บันทึกสำเร็จ", text: data.message, icon: "success", confirmButtonColor: BRAND }).then(() => location.reload());
+                        } else {
+                            Swal.fire("ข้อผิดพลาด", data.error, "error");
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire({ title: "บันทึกสำเร็จ", text: "ระบบได้ทำการอัปเดตคำสั่งซื้อเรียบร้อยแล้ว", icon: "success", confirmButtonColor: BRAND }).then(() => location.reload());
+                    });
             });
         }
     </script>
