@@ -652,8 +652,13 @@
                 if (!result.isConfirmed) return;
 
                 Swal.fire({ title: "กำลังบันทึกข้อมูล", text: "กรุณารอสักครู่...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                const payloadData = JSON.stringify({ branch, orders });
-                fetch(`${API_URL}?action=saveOrder&branch=${encodeURIComponent(branch)}&payload=${encodeURIComponent(payloadData)}`, { method: "GET", redirect: "follow" })
+                const body = JSON.stringify({ branch, orders });
+                fetch(`${API_URL}?action=saveOrder`, {
+                    method: "POST",
+                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body
+                })
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
