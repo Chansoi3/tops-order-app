@@ -34,6 +34,9 @@ function handleRequest(e) {
       case 'getRMSProducts':
         return jsonResponse(getRMSProducts());
 
+      case 'getOrders':
+        return jsonResponse(getOrders(e.parameter.branch));
+
       case 'saveOrder': {
         const payload = parsePayload(e);
         const branch = e.parameter.branch || payload.branch;
@@ -133,7 +136,44 @@ function getRMSProducts() {
   return items;
 }
 
-// ---------- 3. บันทึกคำสั่งซื้อ (ล็อกกันชนกัน + เขียนทีเดียว) ----------
+// ---------- 3. ดึงประวัติคำสั่งซื้อที่บันทึกแล้ว ----------
+function getOrders(branchFilter) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(SHEET.ORDERS);
+  if (!sheet || sheet.getLastRow() < 2) return [];
+
+  const data = sheet.getDataRange().getValues();
+  const code = branchFilter ? String(branchFilter).split('-')[0].trim() : '';
+  const tz = Session.getScriptTimeZone();
+  const out = [];
+
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    if (code && String(r[1]).trim() !== code) continue;
+
+    const rawDate = r[0];
+    const isDate = Object.prototype.toString.call(rawDate) === '[object Date]';
+
+    out.push({
+      ts: isDate ? rawDate.getTime() : 0,
+      date: isDate ? Utilities.formatDate(rawDate, tz, 'dd/MM/yyyy HH:mm') : String(rawDate),
+      branchCode: String(r[1]).trim(),
+      branchName: String(r[2]).trim(),
+      barcode: String(r[3]).trim(),
+      name: r[4],
+      duSize: r[5],
+      duQty: r[6],
+      totalQty: r[7],
+      normalPrice: r[8],
+      promoPrice: r[9],
+      promoType: String(r[10]).trim(),
+      promotion: r[11]
+    });
+  }
+  return out;
+}
+
+// ---------- 4. บันทึกคำสั่งซื้อ (ล็อกกันชนกัน + เขียนทีเดียว) ----------
 function saveToOrdersSheet(branch, orders) {
   if (!orders || orders.length === 0) throw new Error('ไม่มีรายการสั่งซื้อ');
 

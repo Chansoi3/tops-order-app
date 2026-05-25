@@ -6,7 +6,9 @@
     <title>AM404 ระบบสั่งสินค้า</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 
     <style>
         :root {
@@ -191,17 +193,50 @@
 
         .fade-in { animation: fadeIn .25s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+        /* ---------- Header actions ---------- */
+        .header-action {
+            background: rgba(255, 255, 255, .15); color: #fff;
+            border: 0; border-radius: 10px; font-weight: 600; font-size: 13px;
+            padding: 7px 12px; display: inline-flex; align-items: center; gap: 6px;
+            transition: background .18s ease;
+        }
+        .header-action:hover { background: rgba(255, 255, 255, .28); color: #fff; }
+        .header-action svg { width: 16px; height: 16px; }
+
+        /* ---------- History panel ---------- */
+        .panel-head { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%); color: #fff; }
+        .history-group { border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+        .history-group-head { background: #f8f9fc; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+        .history-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px dashed var(--line); }
+        .history-item:last-child { border-bottom: none; }
+        .history-qty { min-width: 48px; text-align: center; background: var(--brand-soft); color: var(--brand); border-radius: 8px; padding: 4px; font-weight: 800; }
+
+        /* ---------- Stats ---------- */
+        .stat-card { background: #f8f9fc; border: 1px solid var(--line); border-radius: 12px; padding: 14px; text-align: center; }
+        .stat-card .v { font-size: 22px; font-weight: 800; color: var(--brand); line-height: 1; }
+        .stat-card .l { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 4px; }
+        .chart-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+        .chart-wrap { position: relative; height: 280px; }
     </style>
 </head>
 <body>
 
     <header class="header-main mb-4">
-        <div class="container d-flex align-items-center gap-3">
+        <div class="container d-flex align-items-center gap-2">
             <span class="brand-logo">AM</span>
-            <div>
+            <div class="flex-grow-1">
                 <div class="brand-title">AM404 ระบบสั่งสินค้า</div>
                 <div class="brand-sub">Order Management System</div>
             </div>
+            <button class="header-action" onclick="openStats()" title="กราฟสถิติการสั่งสินค้า">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span class="d-none d-sm-inline">สถิติ</span>
+            </button>
+            <button class="header-action" onclick="openHistory()" title="ประวัติคำสั่งซื้อ">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+                <span class="d-none d-sm-inline">ประวัติ</span>
+            </button>
         </div>
     </header>
 
@@ -271,6 +306,36 @@
             <div id="mode-summary" style="display: none;"></div>
         </div>
     </main>
+
+    <!-- แถบด้านข้าง: ประวัติคำสั่งซื้อ -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="historyPanel" style="width: min(440px, 92vw);">
+        <div class="offcanvas-header panel-head">
+            <div>
+                <h6 class="offcanvas-title mb-0 fw-bold">ประวัติคำสั่งซื้อ</h6>
+                <small id="historySub" class="opacity-75">ข้อมูลจากชีต Orders</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="header-action" onclick="loadHistory(true)" title="รีเฟรช">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                </button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+            </div>
+        </div>
+        <div class="offcanvas-body" id="historyBody"></div>
+    </div>
+
+    <!-- เมนู: กราฟสถิติการสั่งสินค้า -->
+    <div class="modal fade" id="statsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="border:0; border-radius: var(--radius); overflow: hidden;">
+                <div class="modal-header panel-head">
+                    <h6 class="modal-title fw-bold">กราฟสถิติการสั่งสินค้า</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="statsBody" style="background: var(--bg);"></div>
+            </div>
+        </div>
+    </div>
 
     <div class="sticky-action-bar" id="actionFooter" style="display: none;">
         <div class="footer-stat">
@@ -670,6 +735,147 @@
                     .catch(() => {
                         Swal.fire({ title: "บันทึกสำเร็จ", text: "ระบบได้ทำการอัปเดตคำสั่งซื้อเรียบร้อยแล้ว", icon: "success", confirmButtonColor: BRAND }).then(() => location.reload());
                     });
+            });
+        }
+
+        // ================= ประวัติคำสั่งซื้อ (จากชีต Orders) =================
+        let ordersCache = null;
+        const charts = {};
+
+        function fetchOrders(force) {
+            if (ordersCache && !force) return Promise.resolve(ordersCache);
+            return fetch(`${API_URL}?action=getOrders`)
+                .then(res => res.json())
+                .then(data => {
+                    ordersCache = Array.isArray(data) ? data : [];
+                    return ordersCache;
+                });
+        }
+
+        function openHistory() {
+            bootstrap.Offcanvas.getOrCreateInstance($("historyPanel")).show();
+            loadHistory(false);
+        }
+
+        function loadHistory(force) {
+            const body = $("historyBody");
+            body.innerHTML = `<div class="text-center text-muted py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">กำลังโหลด...</div></div>`;
+            fetchOrders(force).then(renderHistory).catch(() => {
+                body.innerHTML = `<div class="empty-state">โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชอีกครั้ง</div>`;
+            });
+        }
+
+        function renderHistory(orders) {
+            const body = $("historyBody");
+            const sub = $("historySub");
+
+            if (!orders.length) {
+                sub.innerText = "ยังไม่มีคำสั่งซื้อ";
+                body.innerHTML = `<div class="empty-state">ยังไม่มีคำสั่งซื้อที่บันทึกไว้</div>`;
+                return;
+            }
+
+            const totalPieces = orders.reduce((s, o) => s + (Number(o.totalQty) || 0), 0);
+            sub.innerText = `${orders.length} รายการ • รวม ${totalPieces.toLocaleString()} ชิ้น`;
+
+            const groups = {};
+            orders.forEach(o => {
+                const key = `${o.ts}__${o.branchCode}`;
+                if (!groups[key]) groups[key] = { ts: o.ts, date: o.date, branchCode: o.branchCode, branchName: o.branchName, items: [] };
+                groups[key].items.push(o);
+            });
+
+            body.innerHTML = Object.values(groups).sort((a, b) => b.ts - a.ts).map(g => {
+                const pieces = g.items.reduce((s, o) => s + (Number(o.totalQty) || 0), 0);
+                const rows = g.items.map(o => `
+                    <div class="history-item">
+                        <div class="history-qty">${o.totalQty}<div class="label-tiny" style="color:inherit;opacity:.7;">ชิ้น</div></div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold" style="font-size:13px;line-height:1.3;">${escapeHtml(o.name)}</div>
+                            <div class="meta-text">${escapeHtml(o.barcode)} • ${o.duQty} DU × ${o.duSize} • ${escapeHtml(o.promoType || "-")}</div>
+                        </div>
+                    </div>`).join("");
+                return `
+                    <div class="history-group fade-in">
+                        <div class="history-group-head d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold" style="font-size:13px;color:var(--brand);">${escapeHtml(g.branchCode)} - ${escapeHtml(g.branchName)}</div>
+                                <div class="meta-text">${escapeHtml(g.date)}</div>
+                            </div>
+                            <span class="badge bg-secondary">${g.items.length} รายการ • ${pieces} ชิ้น</span>
+                        </div>
+                        ${rows}
+                    </div>`;
+            }).join("");
+        }
+
+        // ================= กราฟสถิติการสั่งสินค้า =================
+        function openStats() {
+            bootstrap.Modal.getOrCreateInstance($("statsModal")).show();
+            const body = $("statsBody");
+            body.innerHTML = `<div class="text-center text-muted py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">กำลังประมวลผล...</div></div>`;
+            fetchOrders(false).then(renderStats).catch(() => {
+                body.innerHTML = `<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>`;
+            });
+        }
+
+        function renderStats(orders) {
+            const body = $("statsBody");
+
+            if (!orders.length) {
+                body.innerHTML = `<div class="empty-state">ยังไม่มีข้อมูลคำสั่งซื้อสำหรับทำสถิติ</div>`;
+                return;
+            }
+
+            const byBranch = {}, byProduct = {}, byType = {};
+            let totalPieces = 0;
+            orders.forEach(o => {
+                const q = Number(o.totalQty) || 0;
+                totalPieces += q;
+                const branchLabel = `${o.branchCode} ${o.branchName}`.trim();
+                byBranch[branchLabel] = (byBranch[branchLabel] || 0) + q;
+                byProduct[o.name] = (byProduct[o.name] || 0) + q;
+                const t = o.promoType || "อื่นๆ";
+                byType[t] = (byType[t] || 0) + q;
+            });
+
+            const branchCount = Object.keys(byBranch).length;
+            const productCount = Object.keys(byProduct).length;
+
+            body.innerHTML = `
+                <div class="row g-2 mb-3">
+                    <div class="col-3"><div class="stat-card"><div class="v">${orders.length.toLocaleString()}</div><div class="l">รายการสั่ง</div></div></div>
+                    <div class="col-3"><div class="stat-card"><div class="v">${totalPieces.toLocaleString()}</div><div class="l">ชิ้นรวม</div></div></div>
+                    <div class="col-3"><div class="stat-card"><div class="v">${branchCount}</div><div class="l">สาขา</div></div></div>
+                    <div class="col-3"><div class="stat-card"><div class="v">${productCount}</div><div class="l">สินค้า (SKU)</div></div></div>
+                </div>
+                <div class="chart-card"><div class="section-title mb-2">ยอดสั่ง (ชิ้น) แยกตามสาขา</div><div class="chart-wrap"><canvas id="chartBranch"></canvas></div></div>
+                <div class="chart-card"><div class="section-title mb-2">สินค้าสั่งมากที่สุด 10 อันดับ</div><div class="chart-wrap"><canvas id="chartProduct"></canvas></div></div>
+                <div class="chart-card"><div class="section-title mb-2">สัดส่วนตาม Promotion Type</div><div class="chart-wrap"><canvas id="chartType"></canvas></div></div>`;
+
+            Object.values(charts).forEach(c => c && c.destroy());
+
+            const PALETTE = ["#00205b", "#0a3a8f", "#e63946", "#1e8e5a", "#f4a261", "#6a4c93", "#2a9d8f", "#e76f51", "#457b9d", "#9d4edd"];
+
+            const branchSorted = Object.entries(byBranch).sort((a, b) => b[1] - a[1]);
+            charts.branch = new Chart($("chartBranch"), {
+                type: "bar",
+                data: { labels: branchSorted.map(e => e[0]), datasets: [{ label: "ชิ้น", data: branchSorted.map(e => e[1]), backgroundColor: "#00205b", borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } } } }
+            });
+
+            const productTop = Object.entries(byProduct).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            charts.product = new Chart($("chartProduct"), {
+                type: "bar",
+                data: { labels: productTop.map(e => e[0]), datasets: [{ label: "ชิ้น", data: productTop.map(e => e[1]), backgroundColor: "#0a3a8f", borderRadius: 6 }] },
+                options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 10 }, callback: function (v) { const lbl = this.getLabelForValue(v); return lbl.length > 28 ? lbl.slice(0, 28) + "…" : lbl; } } } } }
+            });
+
+            const typeEntries = Object.entries(byType).sort((a, b) => b[1] - a[1]);
+            charts.type = new Chart($("chartType"), {
+                type: "doughnut",
+                data: { labels: typeEntries.map(e => e[0]), datasets: [{ data: typeEntries.map(e => e[1]), backgroundColor: PALETTE }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { font: { size: 11 } } } } }
             });
         }
     </script>
