@@ -14,9 +14,9 @@
     <meta name="apple-mobile-web-app-title" content="AM404">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4" defer></script>
 
     <style>
         :root {
@@ -240,16 +240,6 @@
         .step-btn:active { transform: scale(.92); }
         .stepper .input-du-styled { max-width: 60px; }
 
-        /* ---------- Deadline banner ---------- */
-        .deadline-banner {
-            border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px;
-            display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 13px; line-height: 1.35;
-        }
-        .deadline-banner svg { width: 22px; height: 22px; flex-shrink: 0; }
-        .deadline-ok { background: #eaf3ff; color: var(--brand); border: 1px solid #cfe0ff; }
-        .deadline-warn { background: #fff4e5; color: #b3541e; border: 1px solid #ffd9a8; }
-        .deadline-expired { background: #fdecec; color: #b02a37; border: 1px solid #f5c2c7; }
-
         /* ---------- Filter bars ---------- */
         .filter-bar { background: #fff; border-bottom: 1px solid var(--line); padding: 12px 16px; }
         .filter-bar .form-control, .filter-bar .form-select { font-size: 13px; padding: 7px 10px; }
@@ -318,7 +308,6 @@
             </ul>
 
             <div id="mode-promo">
-                <div id="promoDeadline"></div>
                 <div class="card card-elegant p-3" id="promoFilterSection">
                     <label class="form-label mb-2" for="promoSearchInput">ค้นหาสินค้าโปรโมชั่นด้วยบาร์โค้ด</label>
                     <div class="input-group mb-3">
@@ -443,6 +432,17 @@
             return isNaN(d) ? "-" : d.toLocaleDateString("th-TH");
         }
 
+        // ---------- ตัวห่อ Swal (ใช้ alert ทดแทนถ้า lib โหลดไม่ทัน เช่น LINE in-app browser) ----------
+        const swalReady = () => typeof Swal !== "undefined";
+        function showLoading(text) {
+            if (swalReady()) Swal.fire({ title: "กำลังโหลดข้อมูล", text, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        }
+        function closeLoading() { if (swalReady()) Swal.close(); }
+        function showError(title, text) {
+            if (swalReady()) Swal.fire(title, text, "error");
+            else alert(title + (text ? "\n" + text : ""));
+        }
+
         // ---------- Draft (บันทึกร่างอัตโนมัติ) ----------
         function currentBranchCode() {
             return String($("branchSelector").value || "").split("-")[0].trim();
@@ -519,63 +519,47 @@
             onNormalInput(cartId, input.value);
         }
 
-        // ---------- แจ้งเตือนรอบ/เดดไลน์การสั่ง ----------
-        function renderPromoDeadline() {
-            const el = $("promoDeadline");
-            const dates = state.promoProducts.map(p => new Date(p.endDate)).filter(d => !isNaN(d));
-            if (!dates.length) { el.innerHTML = ""; return; }
-
-            const today = new Date(); today.setHours(0, 0, 0, 0);
-            const dayMs = 86400000;
-            const upcoming = dates.filter(d => d.getTime() >= today.getTime());
-            const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
-
-            if (upcoming.length) {
-                const soonest = new Date(Math.min(...upcoming.map(d => d.getTime())));
-                const daysLeft = Math.round((soonest.getTime() - today.getTime()) / dayMs);
-                const cls = daysLeft <= 2 ? "deadline-warn" : "deadline-ok";
-                const leftText = daysLeft <= 0 ? "วันสุดท้ายแล้ววันนี้!" : `เหลืออีก ${daysLeft} วัน`;
-                el.innerHTML = `<div class="deadline-banner ${cls} fade-in">${icon}<div>ปิดรับออเดอร์โปรโมชั่นรอบนี้: <b>${soonest.toLocaleDateString("th-TH")}</b> • ${leftText}</div></div>`;
-            } else {
-                const latest = new Date(Math.max(...dates.map(d => d.getTime())));
-                el.innerHTML = `<div class="deadline-banner deadline-expired fade-in">${icon}<div>โปรโมชั่นรอบนี้หมดเขตแล้ว (สิ้นสุด ${latest.toLocaleDateString("th-TH")})</div></div>`;
-            }
-        }
-
         // ---------- Branch loading ----------
         function onBranchSelected() {
-            const branch = $("branchSelector").value;
-            if (!branch) return;
+            try {
+                const branch = $("branchSelector").value;
+                if (!branch) return;
 
-            Swal.fire({ title: "กำลังโหลดข้อมูล", text: "กรุณารอสักครู่...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                showLoading("กรุณารอสักครู่...");
 
-            Promise.all([
-                fetch(`${API_URL}?action=getProducts&branch=${encodeURIComponent(branch)}`).then(res => res.json()),
-                fetch(`${API_URL}?action=getRMSProducts&branch=${encodeURIComponent(branch)}`).then(res => res.json())
-            ]).then(([promoData, normalData]) => {
-                Swal.close();
+                Promise.all([
+                    fetch(`${API_URL}?action=getProducts&branch=${encodeURIComponent(branch)}`).then(res => res.json()),
+                    fetch(`${API_URL}?action=getRMSProducts&branch=${encodeURIComponent(branch)}`).then(res => res.json())
+                ]).then(([promoData, normalData]) => {
+                    closeLoading();
 
-                state.promoProducts = promoData.map((item, index) => ({ ...item, originalIndex: index }));
-                state.normalProducts = normalData;
-                state.promoQty = {};
-                state.normalCart = [];
+                    state.promoProducts = (promoData || []).map((item, index) => ({ ...item, originalIndex: index }));
+                    state.normalProducts = normalData || [];
+                    state.promoQty = {};
+                    state.normalCart = [];
 
-                $("orderSystemContainer").style.display = "block";
-                $("actionFooter").style.display = "flex";
-                $("normalCartSection").innerHTML = "";
-                $("promoListSection").innerHTML = "";
+                    $("orderSystemContainer").style.display = "block";
+                    $("actionFooter").style.display = "flex";
+                    $("normalCartSection").innerHTML = "";
+                    $("promoListSection").innerHTML = "";
 
-                renderPromoTypeFilters();
-                renderPromoDeadline();
+                    renderPromoTypeFilters();
 
-                const restoredCount = restoreDraft();
-                renderNormalCart();
-                switchMode("promo");
+                    const restoredCount = restoreDraft();
+                    renderNormalCart();
+                    switchMode("promo");
 
-                if (restoredCount > 0) {
-                    Swal.fire({ toast: true, position: "top-end", icon: "info", title: `กู้คืนร่างที่ค้างไว้ ${restoredCount} รายการ`, showConfirmButton: false, timer: 2800 });
-                }
-            }).catch(() => Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้", "error"));
+                    if (restoredCount > 0 && swalReady()) {
+                        Swal.fire({ toast: true, position: "top-end", icon: "info", title: `กู้คืนร่างที่ค้างไว้ ${restoredCount} รายการ`, showConfirmButton: false, timer: 2800 });
+                    }
+                }).catch(err => {
+                    console.error("onBranchSelected fetch failed:", err);
+                    showError("เกิดข้อผิดพลาด", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้");
+                });
+            } catch (err) {
+                console.error("onBranchSelected error:", err);
+                showError("เกิดข้อผิดพลาด", (err && err.message) ? err.message : String(err));
+            }
         }
 
         // ---------- Tab switching ----------
