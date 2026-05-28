@@ -12,6 +12,21 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AM404">
+    <script>
+        /* ตัวจับ error ระดับหน้า: ช่วยวินิจฉัยบน WebView (เช่น in-app browser ของ LINE) */
+        window.addEventListener("error", function (ev) {
+            try {
+                var box = document.getElementById("jsErrBox");
+                if (!box) {
+                    box = document.createElement("div");
+                    box.id = "jsErrBox";
+                    box.style.cssText = "position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#b02a37;color:#fff;font:12px sans-serif;padding:8px;white-space:pre-wrap;";
+                    (document.body || document.documentElement).appendChild(box);
+                }
+                box.textContent = "JS error: " + (ev.message || (ev.error && ev.error.message) || "unknown") + " @" + (ev.filename || "") + ":" + (ev.lineno || "");
+            } catch (e) {}
+        });
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -481,7 +496,7 @@
         });
 
         function escapeHtml(value) {
-            return String(value ?? "")
+            return String(value === undefined || value === null ? "" : value)
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
