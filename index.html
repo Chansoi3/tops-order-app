@@ -127,6 +127,25 @@
         }
         .branch-option:hover, .branch-option:focus { background: var(--brand-soft); color: var(--brand); }
         .branch-option.selected { background: var(--brand); color: #fff; font-weight: 600; }
+        .branch-list { animation: fadeIn .15s ease; }
+        .branch-search { position: sticky; top: 0; background: #fff; padding: 2px 2px 8px; }
+        .branch-search input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13px; }
+        .branch-search input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 .15rem rgba(0, 32, 91, .1); }
+        .branch-option { display: flex; align-items: center; gap: 10px; }
+        .branch-code {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 48px; padding: 3px 8px; border-radius: 7px;
+            background: var(--brand-soft); color: var(--brand); font-weight: 700; font-size: 12px; flex-shrink: 0;
+        }
+        .branch-option.selected .branch-code { background: rgba(255, 255, 255, .25); color: #fff; }
+        .branch-name { font-size: 14px; }
+        #branchLabel { display: inline-flex; align-items: center; gap: 8px; }
+        .branch-empty { text-align: center; color: var(--muted); padding: 18px; font-size: 13px; }
+
+        /* ---------- Welcome hint ---------- */
+        .welcome-hint { text-align: center; padding: 44px 20px; color: var(--muted); }
+        .welcome-hint svg { width: 54px; height: 54px; color: var(--brand); opacity: .35; }
+        .welcome-hint .t { font-weight: 700; color: var(--ink); margin-top: 14px; font-size: 15px; }
 
         /* ---------- Promo filter buttons ---------- */
         .promo-filter-btn {
@@ -336,7 +355,20 @@
                     <span class="placeholder" id="branchLabel">--- คลิกเพื่อเลือกสาขา ---</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
-                <div class="branch-list" id="branchList" style="display:none;"></div>
+                <div class="branch-list" id="branchList" style="display:none;">
+                    <div class="branch-search">
+                        <input type="text" id="branchSearch" placeholder="ค้นหาสาขา..." oninput="filterBranches(this.value)">
+                    </div>
+                    <div id="branchOptions"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-elegant" id="welcomeHint">
+            <div class="welcome-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <div class="t">เลือกสาขาเพื่อเริ่มสั่งสินค้า</div>
+                <div class="small mt-1">เลือกรหัสสาขาด้านบน เพื่อโหลดรายการสินค้าโปรโมชั่นและราคาปกติ</div>
             </div>
         </div>
 
@@ -457,14 +489,47 @@
         const $ = (id) => document.getElementById(id);
 
         // ---------- Custom branch picker ----------
+        function splitBranch(value) {
+            const idx = value.indexOf(" - ");
+            if (idx === -1) return { code: value, name: "" };
+            return { code: value.slice(0, idx).trim(), name: value.slice(idx + 3).trim() };
+        }
+
         function buildBranchPicker() {
             const select = $("branchSelector");
-            const list = $("branchList");
-            if (!select || !list) return;
+            const wrap = $("branchOptions");
+            if (!select || !wrap) return;
             const opts = Array.from(select.options).filter(o => o.value);
-            list.innerHTML = opts.map(o =>
-                `<button type="button" class="branch-option" data-value="${escapeHtml(o.value)}" onclick="selectBranch(this.dataset.value)">${escapeHtml(o.textContent)}</button>`
-            ).join("");
+            wrap.innerHTML = opts.map(o => {
+                const b = splitBranch(o.value);
+                return `<button type="button" class="branch-option" data-value="${escapeHtml(o.value)}" data-search="${escapeHtml(o.value.toLowerCase())}" onclick="selectBranch(this.dataset.value)">
+                    <span class="branch-code">${escapeHtml(b.code)}</span>
+                    <span class="branch-name">${escapeHtml(b.name || o.value)}</span>
+                </button>`;
+            }).join("");
+        }
+
+        function filterBranches(q) {
+            const term = String(q || "").trim().toLowerCase();
+            const items = Array.from($("branchOptions").children);
+            let visible = 0;
+            items.forEach(b => {
+                const match = !term || b.dataset.search.indexOf(term) !== -1;
+                b.style.display = match ? "flex" : "none";
+                if (match) visible++;
+            });
+            let empty = $("branchEmpty");
+            if (visible === 0) {
+                if (!empty) {
+                    empty = document.createElement("div");
+                    empty.id = "branchEmpty";
+                    empty.className = "branch-empty";
+                    empty.textContent = "ไม่พบสาขาที่ค้นหา";
+                    $("branchOptions").appendChild(empty);
+                }
+            } else if (empty) {
+                empty.remove();
+            }
         }
 
         function toggleBranchList(e) {
@@ -473,6 +538,10 @@
             const show = list.style.display === "none";
             list.style.display = show ? "block" : "none";
             $("branchTrigger").classList.toggle("open", show);
+            if (show) {
+                const s = $("branchSearch");
+                if (s) { s.value = ""; filterBranches(""); }
+            }
         }
 
         function closeBranchList() {
@@ -483,10 +552,13 @@
         function selectBranch(value) {
             const select = $("branchSelector");
             select.value = value;
+            const b = splitBranch(value);
             const label = $("branchLabel");
-            label.textContent = value;
             label.classList.remove("placeholder");
-            Array.from($("branchList").children).forEach(b => b.classList.toggle("selected", b.dataset.value === value));
+            label.innerHTML = `<span class="branch-code">${escapeHtml(b.code)}</span><span class="branch-name">${escapeHtml(b.name || value)}</span>`;
+            Array.from($("branchOptions").children).forEach(x => {
+                if (x.dataset && x.dataset.value) x.classList.toggle("selected", x.dataset.value === value);
+            });
             closeBranchList();
             onBranchSelected();
         }
@@ -624,6 +696,7 @@
                     state.promoQty = {};
                     state.normalCart = [];
 
+                    $("welcomeHint").style.display = "none";
                     $("orderSystemContainer").style.display = "block";
                     $("actionFooter").style.display = "flex";
                     $("normalCartSection").innerHTML = "";
