@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>AM404 ระบบสั่งสินค้า</title>
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
@@ -12,6 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AM404">
+    <meta name="color-scheme" content="light">
     <script>
         /* ตัวจับ error ระดับหน้า: ช่วยวินิจฉัยบน WebView (เช่น in-app browser ของ LINE) */
         window.addEventListener("error", function (ev) {
@@ -35,48 +36,123 @@
 
     <style>
         :root {
+            /* Brand */
             --brand: #00205b;
-            --brand-2: #0a3a8f;
+            --brand-2: #0a4fb5;
+            --brand-3: #1860d8;
             --brand-soft: #eaf0ff;
+            --brand-soft-2: #f4f7ff;
+
+            /* Accents */
             --accent: #e63946;
+            --accent-soft: #fdecec;
             --success: #1e8e5a;
-            --ink: #1f2a44;
+            --success-soft: #e6f6ee;
+            --warning: #f59e0b;
+
+            /* Neutrals */
+            --ink: #0f1b33;
+            --ink-2: #2c3a55;
             --muted: #6b7280;
+            --muted-2: #9aa3b2;
             --line: #e7eaf0;
+            --line-2: #f0f3f8;
             --bg: #f3f5fa;
-            --radius: 14px;
-            --shadow-sm: 0 1px 3px rgba(16, 24, 40, .06), 0 1px 2px rgba(16, 24, 40, .04);
-            --shadow-md: 0 8px 24px rgba(16, 24, 40, .08);
+
+            /* Effects */
+            --radius: 16px;
+            --radius-sm: 11px;
+            --radius-lg: 22px;
+            --shadow-xs: 0 1px 2px rgba(16, 24, 40, .05);
+            --shadow-sm: 0 2px 6px rgba(16, 24, 40, .06), 0 1px 2px rgba(16, 24, 40, .04);
+            --shadow-md: 0 10px 28px rgba(16, 24, 40, .09);
+            --shadow-lg: 0 18px 48px rgba(16, 24, 40, .14);
+            --shadow-brand: 0 10px 26px rgba(0, 32, 91, .28);
+
+            /* Motion */
+            --t-fast: .15s ease;
+            --t-base: .22s cubic-bezier(.4, 0, .2, 1);
+            --t-slow: .35s cubic-bezier(.4, 0, .2, 1);
+
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
-        * { -webkit-tap-highlight-color: transparent; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Noto Sans Thai', sans-serif;
-            background: var(--bg);
+            font-family: 'Noto Sans Thai', system-ui, -apple-system, sans-serif;
+            background:
+                radial-gradient(1200px 480px at 50% -180px, rgba(10, 79, 181, .08), transparent 60%),
+                var(--bg);
             color: var(--ink);
-            padding-bottom: 96px;
+            padding-bottom: calc(108px + var(--safe-bottom));
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
+
+        .container { max-width: 720px; }
 
         /* ---------- Header ---------- */
         .header-main {
-            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+            background:
+                radial-gradient(900px 200px at 12% -40px, rgba(255, 255, 255, .14), transparent 60%),
+                linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
             color: #fff;
-            padding: 16px 0;
+            padding: 14px 0;
             box-shadow: var(--shadow-md);
             position: sticky;
             top: 0;
             z-index: 1000;
+            transition: padding var(--t-base), backdrop-filter var(--t-base);
+        }
+        .header-main.scrolled {
+            padding: 9px 0;
+            background:
+                radial-gradient(900px 200px at 12% -40px, rgba(255, 255, 255, .14), transparent 60%),
+                linear-gradient(135deg, rgba(0, 32, 91, .92) 0%, rgba(10, 79, 181, .92) 100%);
+            backdrop-filter: saturate(1.4) blur(10px);
+            -webkit-backdrop-filter: saturate(1.4) blur(10px);
+            box-shadow: 0 6px 22px rgba(0, 32, 91, .22);
         }
         .header-main .brand-logo {
-            width: 36px; height: 36px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, .15);
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, .08));
+            border: 1px solid rgba(255, 255, 255, .18);
             display: inline-flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 15px; letter-spacing: .5px;
+            font-weight: 800; font-size: 16px; letter-spacing: .5px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25);
         }
-        .header-main .brand-title { font-weight: 700; font-size: 17px; line-height: 1.1; }
-        .header-main .brand-sub { font-size: 11px; opacity: .8; font-weight: 400; }
+        .header-main .brand-title { font-weight: 700; font-size: 17px; line-height: 1.15; }
+        .header-main .brand-sub { font-size: 10.5px; opacity: .72; font-weight: 400; letter-spacing: .3px; }
+
+        /* branch chip under header (shows after selecting) */
+        .branch-chip-bar { display: none; }
+        .branch-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--brand-soft); color: var(--brand);
+            border: 1px solid rgba(0, 32, 91, .12);
+            border-radius: 999px; padding: 5px 12px 5px 9px;
+            font-size: 12.5px; font-weight: 600;
+            max-width: 100%;
+        }
+        .branch-chip .dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--success); flex-shrink: 0;
+            box-shadow: 0 0 0 3px rgba(30, 142, 90, .18);
+            animation: pulse 2.4s ease-in-out infinite;
+        }
+        .branch-chip .code {
+            background: var(--brand); color: #fff;
+            border-radius: 6px; padding: 2px 7px; font-size: 11px; font-weight: 700;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(30, 142, 90, .18); }
+            50% { box-shadow: 0 0 0 6px rgba(30, 142, 90, .08); }
+        }
 
         /* ---------- Cards ---------- */
         .card-elegant {
@@ -84,89 +160,135 @@
             border-radius: var(--radius);
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--line);
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
         .section-title { font-weight: 700; font-size: 15px; color: var(--ink); }
 
         /* ---------- Form controls ---------- */
-        .form-label { font-weight: 600; color: var(--ink); font-size: 14px; }
+        .form-label { font-weight: 600; color: var(--ink); font-size: 13.5px; }
         .form-select, .form-control {
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             border: 1px solid var(--line);
             font-size: 15px;
-            padding: 11px 14px;
+            padding: 12px 14px;
+            transition: border-color var(--t-fast), box-shadow var(--t-fast);
         }
         .form-select:focus, .form-control:focus {
-            border-color: var(--brand);
-            box-shadow: 0 0 0 .2rem rgba(0, 32, 91, .12);
+            border-color: var(--brand-2);
+            box-shadow: 0 0 0 .22rem rgba(10, 79, 181, .14);
         }
-        .btn { border-radius: 10px; font-weight: 600; }
-        .btn-brand { background: var(--brand); border: 1px solid var(--brand); color: #fff; }
-        .btn-brand:hover { background: var(--brand-2); color: #fff; }
+        .btn { border-radius: var(--radius-sm); font-weight: 600; transition: transform var(--t-fast), box-shadow var(--t-fast), background var(--t-fast); }
+        .btn:active { transform: scale(.97); }
+        .btn-brand {
+            background: linear-gradient(135deg, var(--brand-2) 0%, var(--brand) 100%);
+            border: 0; color: #fff;
+            box-shadow: var(--shadow-brand);
+        }
+        .btn-brand:hover { filter: brightness(1.07); color: #fff; box-shadow: 0 14px 32px rgba(0, 32, 91, .35); }
+        .btn-soft {
+            background: var(--brand-soft); color: var(--brand);
+            border: 1px solid rgba(0, 32, 91, .1);
+        }
+        .btn-soft:hover { background: #dde7ff; color: var(--brand); }
 
-        /* ---------- Custom branch picker (เลี่ยงบั๊ก native select ใน WebView ของ LINE) ---------- */
+        /* ---------- Custom branch picker ---------- */
         .branch-picker { position: relative; }
         .branch-trigger {
             width: 100%; text-align: left; background: #fff;
-            border: 1px solid var(--line); border-radius: 10px;
-            font-size: 15px; padding: 11px 14px; color: var(--ink);
+            border: 1px solid var(--line); border-radius: var(--radius-sm);
+            font-size: 15px; padding: 12px 14px; color: var(--ink);
             display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer;
+            transition: border-color var(--t-fast), box-shadow var(--t-fast);
         }
-        .branch-trigger.open { border-color: var(--brand); box-shadow: 0 0 0 .2rem rgba(0, 32, 91, .12); }
-        .branch-trigger svg { width: 18px; height: 18px; color: var(--muted); transition: transform .18s ease; flex-shrink: 0; }
+        .branch-trigger:hover { border-color: var(--brand-2); }
+        .branch-trigger.open { border-color: var(--brand-2); box-shadow: 0 0 0 .22rem rgba(10, 79, 181, .14); }
+        .branch-trigger svg { width: 18px; height: 18px; color: var(--muted); transition: transform var(--t-base); flex-shrink: 0; }
         .branch-trigger.open svg { transform: rotate(180deg); }
         .branch-trigger .placeholder { color: var(--muted); }
         .branch-list {
-            position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 1200;
-            background: #fff; border: 1px solid var(--line); border-radius: 12px;
-            box-shadow: var(--shadow-md); max-height: 320px; overflow-y: auto; padding: 6px;
+            position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 1200;
+            background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+            box-shadow: var(--shadow-lg); max-height: 340px; overflow-y: auto; padding: 8px;
+            transform-origin: top center;
         }
         .branch-option {
             width: 100%; text-align: left; background: transparent; border: 0;
-            border-radius: 8px; padding: 12px; font-size: 14px; color: var(--ink); cursor: pointer;
+            border-radius: 9px; padding: 11px 12px; font-size: 14px; color: var(--ink); cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+            transition: background var(--t-fast), color var(--t-fast);
         }
         .branch-option:hover, .branch-option:focus { background: var(--brand-soft); color: var(--brand); }
-        .branch-option.selected { background: var(--brand); color: #fff; font-weight: 600; }
-        .branch-list { animation: fadeIn .15s ease; }
+        .branch-option.selected { background: linear-gradient(135deg, var(--brand-2), var(--brand)); color: #fff; font-weight: 600; }
+        .branch-list.open-anim { animation: dropIn var(--t-base); }
         .branch-search { position: sticky; top: 0; background: #fff; padding: 2px 2px 8px; }
-        .branch-search input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13px; }
-        .branch-search input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 .15rem rgba(0, 32, 91, .1); }
-        .branch-option { display: flex; align-items: center; gap: 10px; }
+        .branch-search input { width: 100%; border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; font-size: 13.5px; }
+        .branch-search input:focus { outline: none; border-color: var(--brand-2); box-shadow: 0 0 0 .15rem rgba(10, 79, 181, .12); }
         .branch-code {
             display: inline-flex; align-items: center; justify-content: center;
-            min-width: 48px; padding: 3px 8px; border-radius: 7px;
+            min-width: 50px; padding: 3px 8px; border-radius: 7px;
             background: var(--brand-soft); color: var(--brand); font-weight: 700; font-size: 12px; flex-shrink: 0;
         }
         .branch-option.selected .branch-code { background: rgba(255, 255, 255, .25); color: #fff; }
-        .branch-name { font-size: 14px; }
         #branchLabel { display: inline-flex; align-items: center; gap: 8px; }
         .branch-empty { text-align: center; color: var(--muted); padding: 18px; font-size: 13px; }
 
         /* ---------- Welcome hint ---------- */
-        .welcome-hint { text-align: center; padding: 44px 20px; color: var(--muted); }
-        .welcome-hint svg { width: 54px; height: 54px; color: var(--brand); opacity: .35; }
-        .welcome-hint .t { font-weight: 700; color: var(--ink); margin-top: 14px; font-size: 15px; }
+        .welcome-hint { text-align: center; padding: 48px 20px; color: var(--muted); }
+        .welcome-illus {
+            width: 86px; height: 86px; margin: 0 auto 16px;
+            border-radius: 26px;
+            background: linear-gradient(135deg, var(--brand-soft) 0%, #dde7ff 100%);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 2px 6px rgba(0, 32, 91, .06);
+        }
+        .welcome-illus svg { width: 42px; height: 42px; color: var(--brand); }
+        .welcome-hint .t { font-weight: 700; color: var(--ink); font-size: 16px; }
+        .welcome-hint .s { font-size: 13px; margin-top: 4px; }
+
+        /* ---------- Tabs ---------- */
+        .nav-pills.nav-modern .nav-link {
+            color: var(--ink-2); font-weight: 600;
+            border-radius: var(--radius-sm); padding: 11px 8px;
+            border: 1px solid var(--line); background: #fff;
+            font-size: 13.5px; transition: all var(--t-fast);
+            width: 100%;
+        }
+        .nav-pills.nav-modern .nav-link:hover { border-color: var(--brand-2); color: var(--brand); transform: translateY(-1px); }
+        .nav-pills.nav-modern .nav-link.active {
+            background: linear-gradient(135deg, var(--brand-2) 0%, var(--brand) 100%);
+            color: #fff; border-color: transparent;
+            box-shadow: var(--shadow-brand);
+        }
+        .nav-pills .nav-link .tab-count {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 20px; height: 20px; padding: 0 5px; margin-left: 5px;
+            font-size: 11px; border-radius: 10px;
+            background: var(--accent); color: #fff; font-weight: 700;
+        }
+        .nav-pills .nav-link.active .tab-count { background: rgba(255, 255, 255, .3); color: #fff; }
 
         /* ---------- Promo filter buttons ---------- */
         .promo-filter-btn {
             background: #fff;
             border: 1px solid var(--line);
-            border-radius: 12px;
+            border-radius: var(--radius-sm);
             padding: 14px 8px;
             text-align: center;
             font-weight: 600;
             cursor: pointer;
-            transition: all .18s ease;
+            transition: all var(--t-base);
             color: var(--ink);
-            font-size: 14px;
+            font-size: 13.5px;
             position: relative;
             height: 100%;
+            overflow: hidden;
         }
-        .promo-filter-btn:hover { border-color: var(--brand); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+        .promo-filter-btn:hover { border-color: var(--brand-2); transform: translateY(-2px); box-shadow: var(--shadow-sm); color: var(--brand); }
         .promo-filter-btn.active {
-            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
-            border-color: var(--brand);
+            background: linear-gradient(135deg, var(--brand-2) 0%, var(--brand) 100%);
+            border-color: transparent;
             color: #fff;
+            box-shadow: var(--shadow-brand);
         }
         .red-badge-corner {
             position: absolute; top: -8px; right: -8px;
@@ -177,163 +299,226 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 6px rgba(230, 57, 70, .4);
         }
+        .promo-filter-btn.active .red-badge-corner { background: rgba(255, 255, 255, .3); box-shadow: none; }
 
         /* ---------- Product cards ---------- */
         .product-mobile-card {
             background: #fff;
             border-radius: var(--radius);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 14px;
-            padding: 16px;
+            margin-bottom: 12px;
+            padding: 14px;
             border: 1px solid var(--line);
-            transition: box-shadow .18s ease;
+            transition: box-shadow var(--t-base), border-color var(--t-base), transform var(--t-base);
+            content-visibility: auto;
+            contain-intrinsic-size: 0 220px;
+            position: relative;
+            overflow: hidden;
         }
         .product-mobile-card:hover { box-shadow: var(--shadow-md); }
-        .product-mobile-card.is-active { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(0, 32, 91, .08); }
+        .product-mobile-card.is-active {
+            border-color: var(--brand-2);
+            box-shadow: 0 0 0 2px rgba(10, 79, 181, .14), var(--shadow-sm);
+        }
         .product-mobile-card.card-normal { border-left: 4px solid var(--brand); }
+        .product-mobile-card.card-promo::before {
+            content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: linear-gradient(180deg, var(--accent), #b91c2a);
+        }
 
-        .product-name { color: var(--brand); font-weight: 700; font-size: 15px; text-decoration: none; line-height: 1.35; }
-        .product-name:hover { text-decoration: underline; }
+        .product-name { color: var(--brand); font-weight: 700; font-size: 15px; text-decoration: none; line-height: 1.35; transition: color var(--t-fast); }
+        .product-name:hover { text-decoration: underline; color: var(--brand-3); }
         .meta-text { color: var(--muted); font-size: 11.5px; }
 
+        .price-old { color: var(--muted-2); font-size: 12px; text-decoration: line-through; }
+        .price-now { color: var(--accent); font-weight: 800; font-size: 17px; }
+        .price-tag {
+            display: inline-flex; align-items: baseline; gap: 6px;
+            background: var(--accent-soft); border-radius: 9px; padding: 5px 10px;
+        }
+
         .input-du-styled {
-            width: 100%; max-width: 90px;
+            width: 100%; max-width: 74px;
             text-align: center; font-weight: 700;
             border: 1px solid var(--line); border-radius: 10px;
-            padding: 8px; font-size: 16px;
+            padding: 9px; font-size: 16px;
+            -moz-appearance: textfield;
         }
-        .input-du-styled:focus { border-color: var(--brand); box-shadow: 0 0 0 .2rem rgba(0, 32, 91, .12); outline: none; }
+        .input-du-styled::-webkit-outer-spin-button,
+        .input-du-styled::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .input-du-styled:focus { border-color: var(--brand-2); box-shadow: 0 0 0 .2rem rgba(10, 79, 181, .14); outline: none; }
 
-        .qty-box { background: #f8f9fc; border-radius: 12px; padding: 10px 6px; }
-        .label-tiny { font-size: 11px; font-weight: 600; color: var(--muted); }
+        .qty-box { background: var(--brand-soft-2); border: 1px solid var(--line); border-radius: 13px; padding: 10px 6px; }
+        .label-tiny { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .2px; }
 
-        /* ---------- Tabs ---------- */
-        .nav-pills .nav-link {
-            color: var(--ink); font-weight: 600;
-            border-radius: 12px; padding: 11px 8px;
-            border: 1px solid var(--line); background: #fff;
-            font-size: 14px; transition: all .18s ease;
-        }
-        .nav-pills .nav-link:hover { border-color: var(--brand); }
-        .nav-pills .nav-link.active {
-            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
-            color: #fff; border-color: var(--brand);
-        }
-        .nav-pills .nav-link .tab-count {
+        /* ---------- Stepper ---------- */
+        .stepper { display: flex; align-items: center; justify-content: center; gap: 7px; }
+        .step-btn {
+            width: 40px; height: 44px; padding: 0;
+            border: 1px solid var(--line); background: #fff; border-radius: 11px;
+            font-size: 22px; font-weight: 700; color: var(--brand); line-height: 1;
             display: inline-flex; align-items: center; justify-content: center;
-            min-width: 20px; height: 20px; padding: 0 5px; margin-left: 5px;
-            font-size: 11px; border-radius: 10px;
-            background: var(--accent); color: #fff; font-weight: 700;
+            cursor: pointer; transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+            box-shadow: var(--shadow-xs);
         }
+        .step-btn:hover { background: var(--brand-soft); }
+        .step-btn:active { transform: scale(.88); background: var(--brand-2); color: #fff; }
+        .stepper .input-du-styled { max-width: 64px; height: 44px; }
+
+        .total-chip {
+            display: inline-flex; flex-direction: column; align-items: center;
+            background: var(--brand); color: #fff;
+            border-radius: 11px; padding: 6px 10px; min-width: 64px;
+            line-height: 1;
+        }
+        .total-chip .n { font-size: 20px; font-weight: 800; }
+        .total-chip .u { font-size: 10px; opacity: .8; margin-top: 2px; }
+        .product-mobile-card:not(.is-active) .total-chip { background: var(--line-2); color: var(--muted); }
 
         /* ---------- Sticky footer ---------- */
         .sticky-action-bar {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(255, 255, 255, .92);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 -4px 16px rgba(16, 24, 40, .08);
-            padding: 12px 18px;
-            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, .86);
+            backdrop-filter: saturate(1.4) blur(12px);
+            -webkit-backdrop-filter: saturate(1.4) blur(12px);
+            box-shadow: 0 -6px 22px rgba(16, 24, 40, .09);
+            padding: 11px 18px calc(11px + var(--safe-bottom));
+            display: flex; justify-content: space-between; align-items: center; gap: 12px;
             z-index: 1010; border-top: 1px solid var(--line);
         }
         .footer-stat .num { font-size: 22px; font-weight: 800; color: var(--brand); line-height: 1; }
         .footer-stat .lbl { font-size: 11px; font-weight: 500; color: var(--muted); }
+        .footer-progress {
+            position: absolute; left: 0; top: 0; height: 3px;
+            background: linear-gradient(90deg, var(--brand-2), var(--accent));
+            transition: width var(--t-base);
+            max-width: 100%;
+        }
 
         /* ---------- Summary ---------- */
         .summary-row {
             display: flex; align-items: center; gap: 12px;
-            padding: 12px 0; border-bottom: 1px dashed var(--line);
+            padding: 11px 0; border-bottom: 1px dashed var(--line);
         }
         .summary-row:last-child { border-bottom: none; }
         .summary-qty-badge {
-            min-width: 56px; text-align: center;
+            min-width: 58px; text-align: center;
             background: var(--brand-soft); color: var(--brand);
-            border-radius: 10px; padding: 6px 4px; font-weight: 800; font-size: 16px;
+            border-radius: 11px; padding: 7px 4px; font-weight: 800; font-size: 16px; line-height: 1.1;
         }
+        .summary-qty-badge.promo { background: var(--accent-soft); color: var(--accent); }
         .grand-total-card {
-            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+            background:
+                radial-gradient(500px 160px at 90% -40px, rgba(255, 255, 255, .15), transparent 60%),
+                linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
             color: #fff; border-radius: var(--radius); padding: 18px;
+            box-shadow: var(--shadow-brand);
         }
         .empty-state { text-align: center; color: var(--muted); padding: 48px 16px; }
         .empty-state svg { opacity: .35; }
 
-        .fade-in { animation: fadeIn .25s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        .fade-in { animation: fadeIn var(--t-slow); }
+        .slide-up { animation: slideUp var(--t-slow); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        @keyframes dropIn { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
 
         /* ---------- Header actions ---------- */
         .header-action {
             background: rgba(255, 255, 255, .15); color: #fff;
-            border: 0; border-radius: 10px; font-weight: 600; font-size: 13px;
-            padding: 7px 12px; display: inline-flex; align-items: center; gap: 6px;
-            transition: background .18s ease;
+            border: 1px solid rgba(255, 255, 255, .14);
+            border-radius: 11px; font-weight: 600; font-size: 13px;
+            padding: 8px 12px; display: inline-flex; align-items: center; gap: 6px;
+            transition: background var(--t-fast), transform var(--t-fast);
         }
         .header-action:hover { background: rgba(255, 255, 255, .28); color: #fff; }
+        .header-action:active { transform: scale(.95); }
         .header-action svg { width: 16px; height: 16px; }
 
         /* ---------- History panel ---------- */
         .panel-head { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%); color: #fff; }
-        .history-group { border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
-        .history-group-head { background: #f8f9fc; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+        .history-group { border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; box-shadow: var(--shadow-xs); }
+        .history-group-head { background: linear-gradient(180deg, #f8f9fc, #f3f5fa); padding: 11px 14px; border-bottom: 1px solid var(--line); }
         .history-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px dashed var(--line); }
         .history-item:last-child { border-bottom: none; }
-        .history-qty { min-width: 48px; text-align: center; background: var(--brand-soft); color: var(--brand); border-radius: 8px; padding: 4px; font-weight: 800; }
+        .history-qty { min-width: 48px; text-align: center; background: var(--brand-soft); color: var(--brand); border-radius: 9px; padding: 5px 4px; font-weight: 800; line-height: 1.1; }
 
         /* ---------- Stats ---------- */
-        .stat-card { background: #f8f9fc; border: 1px solid var(--line); border-radius: 12px; padding: 14px; text-align: center; }
+        .stat-card { background: linear-gradient(180deg, #fff, var(--brand-soft-2)); border: 1px solid var(--line); border-radius: 13px; padding: 14px 8px; text-align: center; }
         .stat-card .v { font-size: 22px; font-weight: 800; color: var(--brand); line-height: 1; }
         .stat-card .l { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 4px; }
         .chart-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
         .chart-wrap { position: relative; height: 280px; }
 
-        /* ---------- Stepper (+/-) ---------- */
-        .stepper { display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .step-btn {
-            width: 34px; height: 38px; padding: 0;
-            border: 1px solid var(--line); background: #fff; border-radius: 9px;
-            font-size: 20px; font-weight: 700; color: var(--brand); line-height: 1;
-            display: inline-flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: background .15s ease, transform .08s ease;
-        }
-        .step-btn:hover { background: var(--brand-soft); }
-        .step-btn:active { transform: scale(.92); }
-        .stepper .input-du-styled { max-width: 60px; }
-
         /* ---------- Filter bars ---------- */
         .filter-bar { background: #fff; border-bottom: 1px solid var(--line); padding: 12px 16px; }
-        .filter-bar .form-control, .filter-bar .form-select { font-size: 13px; padding: 7px 10px; }
+        .filter-bar .form-control, .filter-bar .form-select { font-size: 13px; padding: 8px 10px; }
         .stats-filter {
             display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
             background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 14px;
         }
         .stats-filter .form-control { max-width: 150px; font-size: 13px; padding: 7px 10px; }
-        .del-btn { border: 0; background: transparent; color: #c1c7d0; cursor: pointer; padding: 2px 6px; line-height: 1; border-radius: 6px; }
-        .del-btn:hover { color: var(--accent); background: #fdecec; }
+        .del-btn { border: 0; background: transparent; color: #c1c7d0; cursor: pointer; padding: 2px 6px; line-height: 1; border-radius: 6px; transition: color var(--t-fast), background var(--t-fast); }
+        .del-btn:hover { color: var(--accent); background: var(--accent-soft); }
+
+        /* ---------- Skeleton loader ---------- */
+        .skel {
+            background: linear-gradient(90deg, #eef1f7 25%, #f6f8fc 37%, #eef1f7 63%);
+            background-size: 400% 100%;
+            animation: shimmer 1.3s ease infinite;
+            border-radius: 9px;
+        }
+        @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+        .skel-card { border-radius: var(--radius); border: 1px solid var(--line); padding: 14px; margin-bottom: 12px; background: #fff; }
+        .skel-line { height: 12px; margin-bottom: 8px; }
+
+        /* ---------- Toast helper ---------- */
+        .toast-mini {
+            position: fixed; bottom: calc(118px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
+            background: rgba(15, 27, 51, .94); color: #fff; padding: 10px 18px; border-radius: 999px;
+            font-size: 13px; font-weight: 600; z-index: 1100;
+            box-shadow: var(--shadow-lg);
+            animation: toastIn .3s ease;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translateX(-50%); } }
+
+        @media (hover: none) {
+            .product-mobile-card:hover { box-shadow: var(--shadow-sm); }
+            .promo-filter-btn:hover { transform: none; }
+        }
     </style>
 </head>
 <body>
 
-    <header class="header-main mb-4">
+    <header class="header-main mb-3" id="appHeader">
         <div class="container d-flex align-items-center gap-2">
             <span class="brand-logo">AM</span>
             <div class="flex-grow-1">
                 <div class="brand-title">AM404 ระบบสั่งสินค้า</div>
                 <div class="brand-sub">Order Management System</div>
             </div>
-            <button class="header-action" onclick="openStats()" title="กราฟสถิติการสั่งสินค้า">
+            <button class="header-action" id="btnStats" title="กราฟสถิติการสั่งสินค้า">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 <span class="d-none d-sm-inline">สถิติ</span>
             </button>
-            <button class="header-action" onclick="openHistory()" title="ประวัติคำสั่งซื้อ">
+            <button class="header-action" id="btnHistory" title="ประวัติคำสั่งซื้อ">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
                 <span class="d-none d-sm-inline">ประวัติ</span>
             </button>
         </div>
+        <div class="container branch-chip-bar mt-2" id="branchChipBar">
+            <span class="branch-chip">
+                <span class="dot"></span>
+                <span class="code" id="branchChipCode">—</span>
+                <span id="branchChipName" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</span>
+            </span>
+        </div>
     </header>
 
     <main class="container px-3">
-        <div class="card card-elegant p-3">
+        <div class="card card-elegant p-3" id="branchCard">
             <label class="form-label mb-2" for="branchSelector">เลือกรหัสสาขา</label>
-            <select class="form-select d-none" id="branchSelector" onchange="onBranchSelected()">
+            <select class="form-select d-none" id="branchSelector">
                 <option value="" selected disabled>--- คลิกเพื่อเลือกสาขา ---</option>
                 <option value="730 - Piean - Pin 2">730 - Piean - Pin 2</option>
                 <option value="5209 - Soi Kusolsin">5209 - Soi Kusolsin</option>
@@ -351,13 +536,13 @@
             </select>
 
             <div class="branch-picker">
-                <button type="button" class="branch-trigger" id="branchTrigger" onclick="toggleBranchList(event)">
+                <button type="button" class="branch-trigger" id="branchTrigger">
                     <span class="placeholder" id="branchLabel">--- คลิกเพื่อเลือกสาขา ---</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
                 <div class="branch-list" id="branchList" style="display:none;">
                     <div class="branch-search">
-                        <input type="text" id="branchSearch" placeholder="ค้นหาสาขา..." oninput="filterBranches(this.value)">
+                        <input type="text" id="branchSearch" placeholder="ค้นหาสาขา..." autocomplete="off">
                     </div>
                     <div id="branchOptions"></div>
                 </div>
@@ -366,23 +551,25 @@
 
         <div class="card card-elegant" id="welcomeHint">
             <div class="welcome-hint">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <div class="welcome-illus">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
                 <div class="t">เลือกสาขาเพื่อเริ่มสั่งสินค้า</div>
-                <div class="small mt-1">เลือกรหัสสาขาด้านบน เพื่อโหลดรายการสินค้าโปรโมชั่นและราคาปกติ</div>
+                <div class="s">เลือกรหัสสาขาด้านบน เพื่อโหลดรายการสินค้าโปรโมชั่นและราคาปกติ</div>
             </div>
         </div>
 
         <div id="orderSystemContainer" style="display: none;">
 
-            <ul class="nav nav-pills nav-fill gap-2 mb-3">
+            <ul class="nav nav-pills nav-fill nav-modern gap-2 mb-3">
                 <li class="nav-item">
-                    <button class="nav-link active w-100" id="tab-promo" onclick="switchMode('promo')">สั่งสินค้าโปรโมชั่น</button>
+                    <button class="nav-link active w-100" id="tab-promo">สั่งสินค้าโปรโมชั่น</button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link w-100" id="tab-normal" onclick="switchMode('normal')">สั่งสินค้าราคาปกติ</button>
+                    <button class="nav-link w-100" id="tab-normal">สั่งสินค้าราคาปกติ</button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link w-100" id="tab-summary" onclick="switchMode('summary')">สรุปคำสั่งซื้อ<span class="tab-count" id="summaryTabCount" style="display:none;">0</span></button>
+                    <button class="nav-link w-100" id="tab-summary">สรุปคำสั่งซื้อ<span class="tab-count" id="summaryTabCount" style="display:none;">0</span></button>
                 </li>
             </ul>
 
@@ -390,8 +577,8 @@
                 <div class="card card-elegant p-3" id="promoFilterSection">
                     <label class="form-label mb-2" for="promoSearchInput">ค้นหาสินค้าโปรโมชั่นด้วยบาร์โค้ด</label>
                     <div class="input-group mb-3">
-                        <input type="number" class="form-control" id="promoSearchInput" placeholder="กรอกบาร์โค้ด..." onkeypress="if(event.key==='Enter') searchPromoBarcode()">
-                        <button class="btn btn-brand px-3" onclick="searchPromoBarcode()">ค้นหา</button>
+                        <input type="number" class="form-control" id="promoSearchInput" placeholder="กรอกบาร์โค้ด..." autocomplete="off">
+                        <button class="btn btn-brand px-3" id="btnPromoSearch">ค้นหา</button>
                     </div>
                     <hr class="my-2" style="border-color: var(--line);">
                     <label class="form-label mb-2">หรือเลือกจาก Promotion Type</label>
@@ -405,8 +592,8 @@
                 <div class="card card-elegant p-3">
                     <label class="form-label mb-2" for="normalSearchInput">ค้นหาสินค้าราคาปกติด้วยบาร์โค้ด</label>
                     <div class="input-group">
-                        <input type="number" class="form-control" id="normalSearchInput" placeholder="ใส่ 13 หลัก เช่น 8851932426077" onkeypress="if(event.key==='Enter') searchNormalBarcode()">
-                        <button class="btn btn-brand px-3" onclick="searchNormalBarcode()">ค้นหา</button>
+                        <input type="number" class="form-control" id="normalSearchInput" placeholder="ใส่ 13 หลัก เช่น 8851932426077" autocomplete="off">
+                        <button class="btn btn-brand px-3" id="btnNormalSearch">ค้นหา</button>
                     </div>
                     <small class="text-muted mt-2 d-block">*ระบบจะค้นหาจากฐานข้อมูล RMS</small>
                 </div>
@@ -426,22 +613,25 @@
                 <small id="historySub" class="opacity-75">ข้อมูลจากชีต Orders</small>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <button class="header-action" onclick="loadHistory(true)" title="รีเฟรช">
+                <button class="header-action" id="btnHistExport" title="ส่งออก CSV" style="background:rgba(255,255,255,.12);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
+                <button class="header-action" id="btnHistRefresh" title="รีเฟรช">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
                 </button>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
             </div>
         </div>
         <div class="filter-bar" id="historyFilters" style="display:none;">
-            <select id="histBranch" class="form-select mb-2" onchange="applyHistoryFilters()">
+            <select id="histBranch" class="form-select mb-2">
                 <option value="">ทุกสาขา</option>
             </select>
             <div class="d-flex gap-2 align-items-center">
-                <input type="date" id="histFrom" class="form-control" onchange="applyHistoryFilters()" title="ตั้งแต่วันที่">
+                <input type="date" id="histFrom" class="form-control" title="ตั้งแต่วันที่">
                 <span class="text-muted small">ถึง</span>
-                <input type="date" id="histTo" class="form-control" onchange="applyHistoryFilters()" title="ถึงวันที่">
+                <input type="date" id="histTo" class="form-control" title="ถึงวันที่">
             </div>
-            <button class="btn btn-sm btn-link p-0 mt-1 text-decoration-none" onclick="clearHistoryFilters()">ล้างตัวกรอง</button>
+            <button class="btn btn-sm btn-link p-0 mt-1 text-decoration-none" id="btnHistClear">ล้างตัวกรอง</button>
         </div>
         <div class="offcanvas-body" id="historyBody"></div>
     </div>
@@ -460,11 +650,12 @@
     </div>
 
     <div class="sticky-action-bar" id="actionFooter" style="display: none;">
+        <div class="footer-progress" id="footerProgress" style="width:0;"></div>
         <div class="footer-stat">
-            <div class="num"><span id="activeOrderCount">0</span> <span style="font-size:14px;font-weight:600;">รายการ</span></div>
+            <div class="num"><span id="activeOrderCount">0</span> <span style="font-size:14px;font-weight:600;color:var(--ink-2);">รายการ</span></div>
             <div class="lbl">รวม <span id="activePieceCount">0</span> ชิ้น</div>
         </div>
-        <button class="btn btn-brand fw-bold px-4 py-2" onclick="processSubmit()">
+        <button class="btn btn-brand fw-bold px-4 py-2" id="btnSubmit">
             บันทึกคำสั่งซื้อ
         </button>
     </div>
@@ -473,99 +664,27 @@
         "use strict";
 
         const API_URL = "https://script.google.com/macros/s/AKfycbxdbBQAGR5PxeJleVBJ5ipFimx-CmjXSvDAY_pD3RSfaY4b61hIiZkPpGnyrKwvdqHU/exec";
-
         const BRAND = "#00205b";
 
-        // ---------- Application state (single source of truth) ----------
+        // ---------- Application state ----------
         const state = {
             mode: "promo",
-            promoProducts: [],   // [{...item, originalIndex}]
-            normalProducts: [],  // raw RMS catalog
-            promoQty: {},        // originalIndex -> DU quantity (string)
-            normalCart: []       // [{...item, cartId, duQty}]
+            promoProducts: [],
+            normalProducts: [],
+            promoQty: {},
+            normalCart: [],
+            branch: "",
+            // การ์ดที่ render แล้ว (key-based reconciliation)
+            promoRenderedKeys: new Set(),
+            normalRenderedKeys: new Set(),
+            currentPromoType: null, // null = ทั้งหมด, หรือ type
+            promoSearchHits: null,  // null = ไม่ได้ search, array = filter
+            limit: 60,              // pagination: โหลดเพิ่ม
+            promoShown: 0
         };
 
         // ---------- Utilities ----------
         const $ = (id) => document.getElementById(id);
-
-        // ---------- Custom branch picker ----------
-        function splitBranch(value) {
-            const idx = value.indexOf(" - ");
-            if (idx === -1) return { code: value, name: "" };
-            return { code: value.slice(0, idx).trim(), name: value.slice(idx + 3).trim() };
-        }
-
-        function buildBranchPicker() {
-            const select = $("branchSelector");
-            const wrap = $("branchOptions");
-            if (!select || !wrap) return;
-            const opts = Array.from(select.options).filter(o => o.value);
-            wrap.innerHTML = opts.map(o => {
-                const b = splitBranch(o.value);
-                return `<button type="button" class="branch-option" data-value="${escapeHtml(o.value)}" data-search="${escapeHtml(o.value.toLowerCase())}" onclick="selectBranch(this.dataset.value)">
-                    <span class="branch-code">${escapeHtml(b.code)}</span>
-                    <span class="branch-name">${escapeHtml(b.name || o.value)}</span>
-                </button>`;
-            }).join("");
-        }
-
-        function filterBranches(q) {
-            const term = String(q || "").trim().toLowerCase();
-            const items = Array.from($("branchOptions").children);
-            let visible = 0;
-            items.forEach(b => {
-                const match = !term || b.dataset.search.indexOf(term) !== -1;
-                b.style.display = match ? "flex" : "none";
-                if (match) visible++;
-            });
-            let empty = $("branchEmpty");
-            if (visible === 0) {
-                if (!empty) {
-                    empty = document.createElement("div");
-                    empty.id = "branchEmpty";
-                    empty.className = "branch-empty";
-                    empty.textContent = "ไม่พบสาขาที่ค้นหา";
-                    $("branchOptions").appendChild(empty);
-                }
-            } else if (empty) {
-                empty.remove();
-            }
-        }
-
-        function toggleBranchList(e) {
-            if (e) e.stopPropagation();
-            const list = $("branchList");
-            const show = list.style.display === "none";
-            list.style.display = show ? "block" : "none";
-            $("branchTrigger").classList.toggle("open", show);
-            if (show) {
-                const s = $("branchSearch");
-                if (s) { s.value = ""; filterBranches(""); }
-            }
-        }
-
-        function closeBranchList() {
-            $("branchList").style.display = "none";
-            $("branchTrigger").classList.remove("open");
-        }
-
-        function selectBranch(value) {
-            const select = $("branchSelector");
-            select.value = value;
-            const b = splitBranch(value);
-            const label = $("branchLabel");
-            label.classList.remove("placeholder");
-            label.innerHTML = `<span class="branch-code">${escapeHtml(b.code)}</span><span class="branch-name">${escapeHtml(b.name || value)}</span>`;
-            Array.from($("branchOptions").children).forEach(x => {
-                if (x.dataset && x.dataset.value) x.classList.toggle("selected", x.dataset.value === value);
-            });
-            closeBranchList();
-            onBranchSelected();
-        }
-
-        document.addEventListener("click", (e) => {
-            if (!e.target.closest(".branch-picker")) closeBranchList();
-        });
 
         function escapeHtml(value) {
             return String(value === undefined || value === null ? "" : value)
@@ -574,6 +693,14 @@
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#39;");
+        }
+
+        function debounce(fn, wait) {
+            let t;
+            return function (...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), wait);
+            };
         }
 
         function duSizeOf(product) {
@@ -590,7 +717,31 @@
             return isNaN(d) ? "-" : d.toLocaleDateString("th-TH");
         }
 
-        // ---------- ตัวห่อ Swal (ใช้ alert ทดแทนถ้า lib โหลดไม่ทัน เช่น LINE in-app browser) ----------
+        // ---------- Fetch with timeout + retry ----------
+        function fetchJson(url, options, timeoutMs) {
+            timeoutMs = timeoutMs || 20000;
+            const doFetch = (signal) => fetch(url, Object.assign({}, options || {}, { signal }));
+            return new Promise((resolve, reject) => {
+                let timedOut = false;
+                const ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+                const timer = setTimeout(() => {
+                    timedOut = true;
+                    if (ctrl) ctrl.abort();
+                }, timeoutMs);
+
+                const signal = ctrl ? ctrl.signal : undefined;
+                doFetch(signal).then(res => res.json()).then(data => {
+                    clearTimeout(timer);
+                    resolve(data);
+                }).catch(err => {
+                    clearTimeout(timer);
+                    if (timedOut) reject(new Error("หมดเวลารอเชื่อมต่อ (timeout)"));
+                    else reject(err);
+                });
+            });
+        }
+
+        // ---------- Swal wrappers ----------
         const swalReady = () => typeof Swal !== "undefined";
         function showLoading(text) {
             if (swalReady()) Swal.fire({ title: "กำลังโหลดข้อมูล", text, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -600,8 +751,94 @@
             if (swalReady()) Swal.fire(title, text, "error");
             else alert(title + (text ? "\n" + text : ""));
         }
+        function toastMini(text, ms) {
+            const el = document.createElement("div");
+            el.className = "toast-mini";
+            el.textContent = text;
+            document.body.appendChild(el);
+            setTimeout(() => {
+                el.style.transition = "opacity .3s ease";
+                el.style.opacity = "0";
+                setTimeout(() => el.remove(), 320);
+            }, ms || 2200);
+        }
 
-        // ---------- Draft (บันทึกร่างอัตโนมัติ) ----------
+        // ---------- Custom branch picker ----------
+        function splitBranch(value) {
+            const idx = value.indexOf(" - ");
+            if (idx === -1) return { code: value, name: "" };
+            return { code: value.slice(0, idx).trim(), name: value.slice(idx + 3).trim() };
+        }
+
+        function buildBranchPicker() {
+            const select = $("branchSelector");
+            const wrap = $("branchOptions");
+            if (!select || !wrap) return;
+            const opts = Array.from(select.options).filter(o => o.value);
+            wrap.innerHTML = opts.map(o => {
+                const b = splitBranch(o.value);
+                return `<button type="button" class="branch-option" data-value="${escapeHtml(o.value)}">
+                    <span class="branch-code">${escapeHtml(b.code)}</span>
+                    <span class="branch-name">${escapeHtml(b.name || o.value)}</span>
+                </button>`;
+            }).join("");
+        }
+
+        function filterBranches(q) {
+            const term = String(q || "").trim().toLowerCase();
+            const items = Array.from($("branchOptions").children);
+            let visible = 0;
+            items.forEach(b => {
+                const val = (b.dataset.value || "").toLowerCase();
+                const match = !term || val.indexOf(term) !== -1;
+                b.style.display = match ? "flex" : "none";
+                if (match) visible++;
+            });
+            let empty = $("branchEmpty");
+            if (visible === 0) {
+                if (!empty) {
+                    empty = document.createElement("div");
+                    empty.id = "branchEmpty";
+                    empty.className = "branch-empty";
+                    empty.textContent = "ไม่พบสาขาที่ค้นหา";
+                    $("branchOptions").appendChild(empty);
+                }
+            } else if (empty) {
+                empty.remove();
+            }
+        }
+        const filterBranchesDebounced = debounce(filterBranches, 80);
+
+        function toggleBranchList(show) {
+            const list = $("branchList");
+            const trigger = $("branchTrigger");
+            const open = (show === undefined) ? list.style.display === "none" : show;
+            list.style.display = open ? "block" : "none";
+            trigger.classList.toggle("open", open);
+            if (open) {
+                list.classList.remove("open-anim"); void list.offsetWidth; list.classList.add("open-anim");
+                const s = $("branchSearch");
+                if (s) { s.value = ""; filterBranches(""); setTimeout(() => s.focus(), 30); }
+            }
+        }
+
+        function closeBranchList() { toggleBranchList(false); }
+
+        function selectBranch(value) {
+            const select = $("branchSelector");
+            select.value = value;
+            const b = splitBranch(value);
+            const label = $("branchLabel");
+            label.classList.remove("placeholder");
+            label.innerHTML = `<span class="branch-code">${escapeHtml(b.code)}</span><span class="branch-name">${escapeHtml(b.name || value)}</span>`;
+            Array.from($("branchOptions").children).forEach(x => {
+                if (x.dataset && x.dataset.value) x.classList.toggle("selected", x.dataset.value === value);
+            });
+            closeBranchList();
+            onBranchSelected();
+        }
+
+        // ---------- Draft (autosave) ----------
         function currentBranchCode() {
             return String($("branchSelector").value || "").split("-")[0].trim();
         }
@@ -624,7 +861,7 @@
                 } else {
                     localStorage.setItem(draftKey(code), JSON.stringify({ v: 1, promo, normal, savedAt: Date.now() }));
                 }
-            } catch (e) { /* localStorage ไม่พร้อมใช้งาน */ }
+            } catch (e) {}
         }
 
         function clearDraft() {
@@ -659,35 +896,24 @@
             return restored;
         }
 
-        // ---------- ปุ่ม +/- ----------
-        function stepPromo(index, du, delta) {
-            const input = $(`du_promo_${index}`);
-            if (!input) return;
-            let n = (parseFloat(input.value) || 0) + delta;
-            if (n < 0) n = 0;
-            input.value = n > 0 ? n : "";
-            onPromoInput(index, du, input.value);
-        }
-        function stepNormal(cartId, delta) {
-            const input = $(`du_normal_${cartId}`);
-            if (!input) return;
-            let n = (parseFloat(input.value) || 0) + delta;
-            if (n < 0) n = 0;
-            input.value = n > 0 ? n : "";
-            onNormalInput(cartId, input.value);
-        }
-
         // ---------- Branch loading ----------
         function onBranchSelected() {
             try {
                 const branch = $("branchSelector").value;
                 if (!branch) return;
+                state.branch = branch;
+
+                // chip
+                const b = splitBranch(branch);
+                $("branchChipCode").textContent = b.code;
+                $("branchChipName").textContent = b.name || branch;
+                $("branchChipBar").style.display = "block";
 
                 showLoading("กรุณารอสักครู่...");
 
                 Promise.all([
-                    fetch(`${API_URL}?action=getProducts&branch=${encodeURIComponent(branch)}`).then(res => res.json()),
-                    fetch(`${API_URL}?action=getRMSProducts&branch=${encodeURIComponent(branch)}`).then(res => res.json())
+                    fetchJson(`${API_URL}?action=getProducts&branch=${encodeURIComponent(branch)}`),
+                    fetchJson(`${API_URL}?action=getRMSProducts&branch=${encodeURIComponent(branch)}`)
                 ]).then(([promoData, normalData]) => {
                     closeLoading();
 
@@ -695,6 +921,11 @@
                     state.normalProducts = normalData || [];
                     state.promoQty = {};
                     state.normalCart = [];
+                    state.promoRenderedKeys = new Set();
+                    state.normalRenderedKeys = new Set();
+                    state.currentPromoType = null;
+                    state.promoSearchHits = null;
+                    state.promoShown = 0;
 
                     $("welcomeHint").style.display = "none";
                     $("orderSystemContainer").style.display = "block";
@@ -706,14 +937,17 @@
 
                     const restoredCount = restoreDraft();
                     renderNormalCart();
+                    // แสดง promo ทั้งหมด (type = null = ทุก type)
+                    applyPromoView(null);
                     switchMode("promo");
 
-                    if (restoredCount > 0 && swalReady()) {
-                        Swal.fire({ toast: true, position: "top-end", icon: "info", title: `กู้คืนร่างที่ค้างไว้ ${restoredCount} รายการ`, showConfirmButton: false, timer: 2800 });
+                    if (restoredCount > 0) {
+                        toastMini(`กู้คืนร่างที่ค้างไว้ ${restoredCount} รายการ`);
                     }
                 }).catch(err => {
                     console.error("onBranchSelected fetch failed:", err);
-                    showError("เกิดข้อผิดพลาด", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้");
+                    closeLoading();
+                    showError("เกิดข้อผิดพลาด", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ (" + ((err && err.message) || "") + ")");
                 });
             } catch (err) {
                 console.error("onBranchSelected error:", err);
@@ -732,7 +966,7 @@
             $("mode-normal").style.display = mode === "normal" ? "block" : "none";
             $("mode-summary").style.display = mode === "summary" ? "block" : "none";
 
-            if (mode === "normal") $("normalSearchInput").focus();
+            if (mode === "normal") { const el = $("normalSearchInput"); if (el) el.focus(); }
             if (mode === "summary") renderSummary();
             refreshCounts();
         }
@@ -744,18 +978,39 @@
             state.promoProducts.forEach(p => { counts[p.promoType] = (counts[p.promoType] || 0) + 1; });
 
             grid.innerHTML = Object.keys(counts).map(type => `
-                <div class="col-6 col-md-3">
-                    <div class="promo-filter-btn" data-type="${escapeHtml(type)}" onclick="filterByPromoType('${escapeHtml(type)}')">
+                <div class="col-6 col-md-4">
+                    <div class="promo-filter-btn" data-type="${escapeHtml(type)}">
                         ${escapeHtml(type)}
                         <div class="red-badge-corner">${counts[type]}</div>
                     </div>
                 </div>`).join("");
+
+            grid.querySelectorAll(".promo-filter-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    applyPromoView(btn.dataset.type);
+                });
+            });
         }
 
-        function filterByPromoType(type) {
-            document.querySelectorAll(".promo-filter-btn").forEach(b => b.classList.toggle("active", b.dataset.type === type));
+        // กำหนดว่าจะแสดงรายการ promo แบบไหน: type === null = ทั้งหมด, type string = ตาม type
+        function applyPromoView(type) {
+            state.currentPromoType = type;
+            state.promoSearchHits = null;
             $("promoSearchInput").value = "";
-            renderPromoList(state.promoProducts.filter(p => p.promoType === type));
+            document.querySelectorAll(".promo-filter-btn").forEach(b => {
+                b.classList.toggle("active", type !== null && b.dataset.type === type);
+            });
+            state.promoShown = 0;
+            $("promoListSection").innerHTML = "";
+            state.promoRenderedKeys = new Set();
+            renderPromoListPaged(true);
+        }
+
+        function getVisiblePromoProducts() {
+            let list = state.promoProducts;
+            if (state.promoSearchHits) list = state.promoSearchHits;
+            else if (state.currentPromoType) list = list.filter(p => p.promoType === state.currentPromoType);
+            return list;
         }
 
         function searchPromoBarcode() {
@@ -764,50 +1019,108 @@
             const found = state.promoProducts.filter(p => p.barcode === barcode);
             if (found.length > 0) {
                 document.querySelectorAll(".promo-filter-btn").forEach(b => b.classList.remove("active"));
-                renderPromoList(found);
+                state.currentPromoType = null;
+                state.promoSearchHits = found;
+                state.promoShown = 0;
+                $("promoListSection").innerHTML = "";
+                state.promoRenderedKeys = new Set();
+                renderPromoListPaged(true);
             } else {
                 Swal.fire("ไม่พบข้อมูล", `ไม่มีสินค้ารหัส ${escapeHtml(barcode)} ในโปรโมชั่นรอบนี้`, "warning");
             }
         }
 
-        function renderPromoList(products) {
-            $("promoListSection").innerHTML = products.map(p => {
-                const du = duSizeOf(p);
-                const qty = state.promoQty[p.originalIndex] || "";
-                const total = (parseFloat(qty) || 0) * du;
-                const active = total > 0 ? " is-active" : "";
-                return `
-                    <div class="product-mobile-card${active} fade-in" id="card_promo_${p.originalIndex}">
-                        <a href="${imageSearchUrl(p.barcode)}" target="_blank" rel="noopener" class="product-name">${escapeHtml(p.name)}</a>
-                        <div class="meta-text mt-1">Barcode: ${escapeHtml(p.barcode)} • Group: ${escapeHtml(p.group)}</div>
-                        <div class="d-flex gap-1 flex-wrap mt-2">
-                            <span class="badge bg-secondary fw-normal">รอบ: ${formatDate(p.startDate)} - ${formatDate(p.endDate)}</span>
-                            <span class="badge bg-danger fw-normal">โปร: ${escapeHtml(p.promotionDesc)}</span>
+        // สร้างการ์ด promo หนึ่งใบ โดยใช้ dataset และ event delegation (ปลอด XSS)
+        function buildPromoCard(p) {
+            const du = duSizeOf(p);
+            const qty = state.promoQty[p.originalIndex] || "";
+            const total = (parseFloat(qty) || 0) * du;
+            const active = total > 0 ? " is-active" : "";
+            const wrap = document.createElement("div");
+            wrap.className = `product-mobile-card card-promo${active} slide-up`;
+            wrap.id = `card_promo_${p.originalIndex}`;
+            wrap.dataset.key = String(p.originalIndex);
+            wrap.dataset.du = String(du);
+            wrap.dataset.index = String(p.originalIndex);
+            wrap.innerHTML = `
+                <a href="${imageSearchUrl(p.barcode)}" target="_blank" rel="noopener" class="product-name">${escapeHtml(p.name)}</a>
+                <div class="meta-text mt-1">Barcode: ${escapeHtml(p.barcode)} • Group: ${escapeHtml(p.group)}</div>
+                <div class="d-flex gap-1 flex-wrap mt-2">
+                    <span class="badge bg-secondary fw-normal">รอบ: ${formatDate(p.startDate)} - ${formatDate(p.endDate)}</span>
+                    <span class="badge bg-danger fw-normal">โปร: ${escapeHtml(p.promotionDesc)}</span>
+                </div>
+                <hr class="my-3" style="border-color: var(--line);">
+                <div class="row align-items-center text-center g-2">
+                    <div class="col-4">
+                        <div class="price-old">ปกติ ฿${escapeHtml(p.normalPrice)}</div>
+                        <div class="price-tag"><span class="price-now">฿${escapeHtml(p.promoPrice)}</span></div>
+                    </div>
+                    <div class="col-4">
+                        <div class="qty-box">
+                            <div class="label-tiny mb-1">ระบุ DU</div>
+                            <div class="stepper">
+                                <button type="button" class="step-btn" data-act="dec" aria-label="ลด">−</button>
+                                <input type="number" class="form-control input-du-styled" id="du_promo_${p.originalIndex}" min="0" inputmode="numeric" placeholder="0" value="${escapeHtml(qty)}">
+                                <button type="button" class="step-btn" data-act="inc" aria-label="เพิ่ม">+</button>
+                            </div>
+                            <div class="label-tiny mt-1">(${du} ชิ้น/DU)</div>
                         </div>
-                        <hr class="my-3" style="border-color: var(--line);">
-                        <div class="row align-items-center text-center g-2">
-                            <div class="col-4">
-                                <div class="meta-text text-decoration-line-through">ปกติ ฿${escapeHtml(p.normalPrice)}</div>
-                                <div class="text-success fw-bold" style="font-size:15px;">โปร ฿${escapeHtml(p.promoPrice)}</div>
-                            </div>
-                            <div class="col-4">
-                                <div class="qty-box">
-                                    <div class="label-tiny mb-1">ระบุ DU</div>
-                                    <div class="stepper">
-                                        <button type="button" class="step-btn" onclick="stepPromo(${p.originalIndex}, ${du}, -1)">−</button>
-                                        <input type="number" class="form-control input-du-styled" id="du_promo_${p.originalIndex}" min="0" placeholder="0" value="${escapeHtml(qty)}" oninput="onPromoInput(${p.originalIndex}, ${du}, this.value)">
-                                        <button type="button" class="step-btn" onclick="stepPromo(${p.originalIndex}, ${du}, 1)">+</button>
-                                    </div>
-                                    <div class="label-tiny mt-1">(${du} ชิ้น/DU)</div>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="label-tiny">รวมชิ้นสั่ง</div>
-                                <div class="fw-bold text-primary" style="font-size:20px;" id="total_promo_${p.originalIndex}">${total}</div>
-                            </div>
-                        </div>
-                    </div>`;
-            }).join("");
+                    </div>
+                    <div class="col-4">
+                        <div class="label-tiny mb-1">รวมชิ้นสั่ง</div>
+                        <span class="total-chip" id="total_promo_${p.originalIndex}"><span class="n">${total}</span><span class="u">ชิ้น</span></span>
+                    </div>
+                </div>`;
+            return wrap;
+        }
+
+        // โหลดเพิ่ม pagination
+        function renderPromoListPaged(reset) {
+            const list = getVisiblePromoProducts();
+            const container = $("promoListSection");
+            if (reset) {
+                container.innerHTML = "";
+                state.promoRenderedKeys = new Set();
+                state.promoShown = 0;
+            }
+            const total = list.length;
+            const start = state.promoShown;
+            const end = Math.min(start + state.limit, total);
+            const frag = document.createDocumentFragment();
+            for (let i = start; i < end; i++) {
+                const p = list[i];
+                const key = String(p.originalIndex);
+                if (state.promoRenderedKeys.has(key)) continue;
+                state.promoRenderedKeys.add(key);
+                frag.appendChild(buildPromoCard(p));
+            }
+            container.appendChild(frag);
+            state.promoShown = end;
+
+            // ปุ่มโหลดเพิ่ม
+            let moreBtn = $("promoLoadMore");
+            if (moreBtn) moreBtn.remove();
+            if (end < total) {
+                moreBtn = document.createElement("div");
+                moreBtn.id = "promoLoadMore";
+                moreBtn.className = "text-center my-2";
+                moreBtn.innerHTML = `<button class="btn btn-soft px-4">โหลดเพิ่ม (${total - end} รายการ)</button>`;
+                moreBtn.querySelector("button").addEventListener("click", () => renderPromoListPaged(false));
+                container.appendChild(moreBtn);
+            }
+            if (total === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="fw-semibold">ไม่พบสินค้า</div><div class="small mt-1">ลองเลือก Promotion Type หรือค้นหาบาร์โค้ดอื่น</div></div>`;
+            }
+        }
+
+        // ---------- Event delegation สำหรับการ์ด promo ----------
+        function onPromoStep(index, du, delta) {
+            const input = $(`du_promo_${index}`);
+            if (!input) return;
+            let n = (parseFloat(input.value) || 0) + delta;
+            if (n < 0) n = 0;
+            input.value = n > 0 ? n : "";
+            onPromoInput(index, du, input.value);
         }
 
         function onPromoInput(index, du, value) {
@@ -817,8 +1130,10 @@
                 state.promoQty[index] = value;
             }
             const total = (parseFloat(value) || 0) * du;
-            $(`total_promo_${index}`).innerText = total;
-            $(`card_promo_${index}`).classList.toggle("is-active", total > 0);
+            const totalEl = $(`total_promo_${index}`);
+            if (totalEl) totalEl.querySelector(".n").innerText = total;
+            const card = $(`card_promo_${index}`);
+            if (card) card.classList.toggle("is-active", total > 0);
             refreshCounts();
             saveDraft();
         }
@@ -834,11 +1149,12 @@
             if (foundProduct) {
                 const exists = state.normalCart.some(p => p.barcode === barcode);
                 if (!exists) {
-                    state.normalCart.push({ ...foundProduct, cartId: Date.now(), duQty: "" });
+                    state.normalCart.push({ ...foundProduct, cartId: Date.now() + Math.floor(Math.random() * 100000), duQty: "" });
                     renderNormalCart();
                     saveDraft();
+                    toastMini("เพิ่มสินค้าเข้าตะกร้า");
                 } else {
-                    Swal.fire({ title: "สินค้านี้ถูกเลือกแล้ว", text: "รายการอยู่ด้านล่าง โปรดแก้ไขจำนวน", icon: "info", timer: 1500, showConfirmButton: false });
+                    toastMini("สินค้านี้ถูกเลือกแล้ว");
                 }
             } else {
                 Swal.fire({ title: "ไม่พบข้อมูล", text: `รหัส ${escapeHtml(barcode)} ไม่มีในฐานข้อมูล RMS`, icon: "error", confirmButtonColor: BRAND });
@@ -849,59 +1165,137 @@
 
         function removeNormalItem(cartId) {
             state.normalCart = state.normalCart.filter(p => p.cartId !== cartId);
-            renderNormalCart();
-            refreshCounts();
-            saveDraft();
+            const card = document.querySelector(`[data-cartid="${cartId}"]`);
+            if (card) {
+                card.style.transition = "opacity .2s ease, transform .2s ease";
+                card.style.opacity = "0";
+                card.style.transform = "translateX(20px)";
+                setTimeout(() => { card.remove(); state.normalRenderedKeys.delete(String(cartId)); refreshCounts(); saveDraft(); }, 200);
+            } else {
+                renderNormalCart();
+                refreshCounts();
+                saveDraft();
+            }
+        }
+
+        function buildNormalCard(p) {
+            const du = duSizeOf(p);
+            const total = (parseFloat(p.duQty) || 0) * du;
+            const active = total > 0 ? " is-active" : "";
+            const wrap = document.createElement("div");
+            wrap.className = `product-mobile-card card-normal${active} slide-up`;
+            wrap.dataset.cartid = String(p.cartId);
+            wrap.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <a href="${imageSearchUrl(p.barcode)}" target="_blank" rel="noopener" class="product-name">${escapeHtml(p.name)}</a>
+                    <button class="btn btn-sm btn-outline-danger border-0 py-0 px-2" data-act="del" title="ลบรายการ">&times;</button>
+                </div>
+                <div class="meta-text mt-1">Barcode: ${escapeHtml(p.barcode)}</div>
+                <span class="badge bg-secondary fw-normal mt-1">ราคาปกติ (RMS)</span>
+                <hr class="my-3" style="border-color: var(--line);">
+                <div class="row align-items-center text-center g-2">
+                    <div class="col-6">
+                        <div class="qty-box">
+                            <div class="label-tiny mb-1">ระบุ DU</div>
+                            <div class="stepper">
+                                <button type="button" class="step-btn" data-act="dec" aria-label="ลด">−</button>
+                                <input type="number" class="form-control input-du-styled" id="du_normal_${p.cartId}" min="0" inputmode="numeric" placeholder="0" value="${escapeHtml(p.duQty)}">
+                                <button type="button" class="step-btn" data-act="inc" aria-label="เพิ่ม">+</button>
+                            </div>
+                            <div class="label-tiny mt-1">(${du} ชิ้น/DU)</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="label-tiny mb-1">รวมชิ้นสั่ง</div>
+                        <span class="total-chip" id="total_normal_${p.cartId}"><span class="n">${total}</span><span class="u">ชิ้น</span></span>
+                    </div>
+                </div>`;
+            return wrap;
         }
 
         function renderNormalCart() {
-            $("normalCartSection").innerHTML = [...state.normalCart].reverse().map(p => {
-                const du = duSizeOf(p);
-                const total = (parseFloat(p.duQty) || 0) * du;
-                const active = total > 0 ? " is-active" : "";
-                return `
-                    <div class="product-mobile-card card-normal${active} fade-in">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <a href="${imageSearchUrl(p.barcode)}" target="_blank" rel="noopener" class="product-name">${escapeHtml(p.name)}</a>
-                            <button class="btn btn-sm btn-outline-danger border-0 py-0 px-2" title="ลบรายการ" onclick="removeNormalItem(${p.cartId})">&times;</button>
-                        </div>
-                        <div class="meta-text mt-1">Barcode: ${escapeHtml(p.barcode)}</div>
-                        <span class="badge bg-secondary fw-normal mt-1">ราคาปกติ (RMS)</span>
-                        <hr class="my-3" style="border-color: var(--line);">
-                        <div class="row align-items-center text-center g-2">
-                            <div class="col-6">
-                                <div class="qty-box">
-                                    <div class="label-tiny mb-1">ระบุ DU</div>
-                                    <div class="stepper">
-                                        <button type="button" class="step-btn" onclick="stepNormal(${p.cartId}, -1)">−</button>
-                                        <input type="number" class="form-control input-du-styled" id="du_normal_${p.cartId}" min="0" placeholder="0" value="${escapeHtml(p.duQty)}" oninput="onNormalInput(${p.cartId}, this.value)">
-                                        <button type="button" class="step-btn" onclick="stepNormal(${p.cartId}, 1)">+</button>
-                                    </div>
-                                    <div class="label-tiny mt-1">(${du} ชิ้น/DU)</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="label-tiny">รวมชิ้นสั่ง</div>
-                                <div class="fw-bold text-primary" style="font-size:22px;" id="total_normal_${p.cartId}">${total}</div>
-                            </div>
-                        </div>
-                    </div>`;
-            }).join("");
+            const container = $("normalCartSection");
+            container.innerHTML = "";
+            state.normalRenderedKeys = new Set();
+            if (state.normalCart.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="fw-semibold">ยังไม่มีสินค้าในตะกร้า</div><div class="small mt-1">ค้นหาบาร์โค้ดด้านบนเพื่อเพิ่มสินค้าราคาปกติ</div></div>`;
+                return;
+            }
+            const frag = document.createDocumentFragment();
+            // เรียงใหม่สุดขึ้นบน
+            [...state.normalCart].reverse().forEach(p => {
+                state.normalRenderedKeys.add(String(p.cartId));
+                frag.appendChild(buildNormalCard(p));
+            });
+            container.appendChild(frag);
         }
 
         function onNormalInput(cartId, value) {
             const item = state.normalCart.find(p => p.cartId === cartId);
             if (!item) return;
             item.duQty = value;
-            $(`total_normal_${cartId}`).innerText = (parseFloat(value) || 0) * duSizeOf(item);
+            const totalEl = $(`total_normal_${cartId}`);
+            if (totalEl) totalEl.querySelector(".n").innerText = (parseFloat(value) || 0) * duSizeOf(item);
+            const card = document.querySelector(`[data-cartid="${cartId}"]`);
+            if (card) card.classList.toggle("is-active", (parseFloat(value) || 0) > 0);
             refreshCounts();
             saveDraft();
         }
 
+        function onNormalStep(cartId, delta) {
+            const input = $(`du_normal_${cartId}`);
+            if (!input) return;
+            let n = (parseFloat(input.value) || 0) + delta;
+            if (n < 0) n = 0;
+            input.value = n > 0 ? n : "";
+            onNormalInput(cartId, input.value);
+        }
+
+        // ================= Event delegation (XSS-safe) =================
+        // promo list
+        $("promoListSection").addEventListener("click", (e) => {
+            const btn = e.target.closest(".step-btn");
+            if (!btn) return;
+            const card = e.target.closest(".product-mobile-card");
+            if (!card) return;
+            const index = parseInt(card.dataset.index, 10);
+            const du = parseInt(card.dataset.du, 10);
+            const delta = btn.dataset.act === "inc" ? 1 : -1;
+            onPromoStep(index, du, delta);
+        });
+        $("promoListSection").addEventListener("input", (e) => {
+            const inp = e.target.closest("input.input-du-styled");
+            if (!inp) return;
+            const card = e.target.closest(".product-mobile-card");
+            if (!card) return;
+            const index = parseInt(card.dataset.index, 10);
+            const du = parseInt(card.dataset.du, 10);
+            onPromoInput(index, du, inp.value);
+        });
+
+        // normal cart
+        $("normalCartSection").addEventListener("click", (e) => {
+            const card = e.target.closest(".product-mobile-card");
+            if (!card) return;
+            const cartId = parseInt(card.dataset.cartid, 10);
+            const btn = e.target.closest("[data-act]");
+            if (!btn) return;
+            if (btn.dataset.act === "del") { removeNormalItem(cartId); return; }
+            const delta = btn.dataset.act === "inc" ? 1 : -1;
+            onNormalStep(cartId, delta);
+        });
+        $("normalCartSection").addEventListener("input", (e) => {
+            const inp = e.target.closest("input.input-du-styled");
+            if (!inp) return;
+            const card = e.target.closest(".product-mobile-card");
+            if (!card) return;
+            const cartId = parseInt(card.dataset.cartid, 10);
+            onNormalInput(cartId, inp.value);
+        });
+
         // ================= สรุปคำสั่งซื้อ =================
         function collectOrders() {
             const orders = [];
-
             state.promoProducts.forEach(p => {
                 const duQty = parseFloat(state.promoQty[p.originalIndex]) || 0;
                 if (duQty > 0) {
@@ -912,11 +1306,14 @@
                         barcode: p.barcode,
                         duQty,
                         duSize: duSizeOf(p),
-                        totalQty: duQty * duSizeOf(p)
+                        totalQty: duQty * duSizeOf(p),
+                        normalPrice: p.normalPrice,
+                        promoPrice: p.promoPrice,
+                        promoType: p.promoType,
+                        promotion: p.promotionDesc
                     });
                 }
             });
-
             state.normalCart.forEach(p => {
                 const duQty = parseFloat(p.duQty) || 0;
                 if (duQty > 0) {
@@ -927,18 +1324,21 @@
                         barcode: p.barcode,
                         duQty,
                         duSize: duSizeOf(p),
-                        totalQty: duQty * duSizeOf(p)
+                        totalQty: duQty * duSizeOf(p),
+                        normalPrice: "",
+                        promoPrice: "",
+                        promoType: "",
+                        promotion: ""
                     });
                 }
             });
-
             return orders;
         }
 
         function renderSummary() {
             const orders = collectOrders();
             const container = $("mode-summary");
-            const branch = $("branchSelector").value;
+            const branch = state.branch;
 
             if (orders.length === 0) {
                 container.innerHTML = `
@@ -956,14 +1356,14 @@
             const normalOrders = orders.filter(o => o.type === "normal");
             const totalPieces = orders.reduce((sum, o) => sum + o.totalQty, 0);
 
-            const renderGroup = (title, items, accent) => {
+            const renderGroup = (title, items, accent, isPromo) => {
                 if (items.length === 0) return "";
                 const rows = items.map(o => `
                     <div class="summary-row">
-                        <div class="summary-qty-badge">${o.totalQty}<div class="label-tiny" style="color:inherit;opacity:.7;">ชิ้น</div></div>
+                        <div class="summary-qty-badge ${isPromo ? 'promo' : ''}">${o.totalQty}<div class="label-tiny" style="color:inherit;opacity:.7;">ชิ้น</div></div>
                         <div class="flex-grow-1">
                             <div class="fw-semibold" style="font-size:14px;line-height:1.3;">${escapeHtml(o.name)}</div>
-                            <div class="meta-text">${escapeHtml(o.barcode)} • ${o.duQty} DU × ${o.duSize} ชิ้น</div>
+                            <div class="meta-text">${escapeHtml(o.barcode)} • ${o.duQty} DU × ${o.duSize} ชิ้น${isPromo && o.promoPrice ? ' • ฿'+escapeHtml(o.promoPrice) : ''}</div>
                         </div>
                     </div>`).join("");
                 return `
@@ -976,12 +1376,18 @@
             };
 
             container.innerHTML = `
-                <div class="card card-elegant p-3 fade-in">
-                    <div class="label-tiny">สาขาที่สั่งซื้อ</div>
-                    <div class="fw-bold" style="color:var(--brand);font-size:16px;">${escapeHtml(branch)}</div>
+                <div class="card card-elegant p-3 fade-in d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="label-tiny">สาขาที่สั่งซื้อ</div>
+                        <div class="fw-bold" style="color:var(--brand);font-size:16px;">${escapeHtml(branch)}</div>
+                    </div>
+                    <button class="btn btn-soft btn-sm" id="btnSummaryExport">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        ส่งออก CSV
+                    </button>
                 </div>
-                ${renderGroup("สินค้าโปรโมชั่น", promoOrders, "bg-danger")}
-                ${renderGroup("สินค้าราคาปกติ (RMS)", normalOrders, "bg-secondary")}
+                ${renderGroup("สินค้าโปรโมชั่น", promoOrders, "bg-danger", true)}
+                ${renderGroup("สินค้าราคาปกติ (RMS)", normalOrders, "bg-secondary", false)}
                 <div class="grand-total-card fade-in d-flex justify-content-between align-items-center">
                     <div>
                         <div style="font-size:12px;opacity:.85;">รวมทั้งหมด</div>
@@ -992,6 +1398,57 @@
                         <div style="font-size:22px;font-weight:800;">${totalPieces} ชิ้น</div>
                     </div>
                 </div>`;
+
+            const exportBtn = $("btnSummaryExport");
+            if (exportBtn) exportBtn.addEventListener("click", () => exportCurrentOrdersCSV());
+        }
+
+        // ================= Export CSV =================
+        function csvCell(v) {
+            const s = String(v === undefined || v === null ? "" : v);
+            if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+            return s;
+        }
+
+        function downloadCSV(filename, header, rows) {
+            const BOM = "\uFEFF"; // ทำให้ Excel เปิดภาษาไทยถูกต้อง
+            const csv = BOM + [header, ...rows].map(r => r.map(csvCell).join(",")).join("\r\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+        }
+
+        function exportCurrentOrdersCSV() {
+            const orders = collectOrders();
+            if (!orders.length) return toastMini("ไม่มีรายการให้ส่งออก");
+            const header = ["วันที่", "รหัสสาขา", "สาขา", "บาร์โค้ด", "ชื่อสินค้า", "บรรจุภัณฑ์ต่อDU", "จำนวน(DU)", "รวมชิ้น", "ราคาปกติ", "ราคาโปรโมชั่น", "PromotionType", "Promotion"];
+            const b = splitBranch(state.branch);
+            const now = new Date().toLocaleString("th-TH");
+            const rows = orders.map(o => [
+                now, b.code, b.name, o.barcode, o.name, o.duSize, o.duQty, o.totalQty,
+                o.normalPrice || "-", o.promoPrice || "-", o.promoType || "ราคาปกติ", o.promotion || "RMS"
+            ]);
+            const stamp = new Date().toISOString().slice(0, 10);
+            downloadCSV(`AM404_order_${b.code}_${stamp}.csv`, header, rows);
+            toastMini("ส่งออก CSV แล้ว");
+        }
+
+        function exportHistoryCSV() {
+            const list = getFilteredHistory();
+            if (!list.length) return toastMini("ไม่มีประวัติให้ส่งออก");
+            const header = ["วันที่", "รหัสสาขา", "สาขา", "บาร์โค้ด", "ชื่อสินค้า", "บรรจุภัณฑ์ต่อDU", "จำนวน(DU)", "รวมชิ้น", "ราคาปกติ", "ราคาโปรโมชั่น", "PromotionType", "Promotion"];
+            const rows = list.map(o => [
+                o.date, o.branchCode, o.branchName, o.barcode, o.name, o.duSize, o.duQty, o.totalQty,
+                o.normalPrice || "-", o.promoPrice || "-", o.promoType || "-", o.promotion || "-"
+            ]);
+            const stamp = new Date().toISOString().slice(0, 10);
+            downloadCSV(`AM404_history_${stamp}.csv`, header, rows);
+            toastMini("ส่งออก CSV แล้ว");
         }
 
         // ================= ตัวนับ / Footer =================
@@ -1004,11 +1461,16 @@
             const tabCount = $("summaryTabCount");
             tabCount.innerText = orders.length;
             tabCount.style.display = orders.length > 0 ? "inline-flex" : "none";
+
+            // progress (เส้นบน footer)
+            const max = Math.max(orders.length, 1);
+            const pct = Math.min(100, (orders.length / Math.max(max, 10)) * 100);
+            $("footerProgress").style.width = pct + "%";
         }
 
-        // ================= บันทึกคำสั่งซื้อ =================
+        // ================= บันทึกคำสั่งซื้อ (soft refresh) =================
         function processSubmit() {
-            const branch = $("branchSelector").value;
+            const branch = state.branch;
             const collected = collectOrders();
 
             if (collected.length === 0) {
@@ -1034,36 +1496,88 @@
 
                 Swal.fire({ title: "กำลังบันทึกข้อมูล", text: "กรุณารอสักครู่...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 const body = JSON.stringify({ branch, orders });
-                fetch(`${API_URL}?action=saveOrder`, {
+                fetchJson(`${API_URL}?action=saveOrder`, {
                     method: "POST",
                     redirect: "follow",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            clearDraft();
-                            Swal.fire({ title: "บันทึกสำเร็จ", text: data.message, icon: "success", confirmButtonColor: BRAND }).then(() => location.reload());
-                        } else {
-                            Swal.fire("ข้อผิดพลาด", data.error, "error");
-                        }
-                    })
-                    .catch(() => {
+                }, 30000).then(data => {
+                    if (data && data.success) {
                         clearDraft();
-                        Swal.fire({ title: "บันทึกสำเร็จ", text: "ระบบได้ทำการอัปเดตคำสั่งซื้อเรียบร้อยแล้ว", icon: "success", confirmButtonColor: BRAND }).then(() => location.reload());
+                        // ทำ soft refresh: โหลด products ใหม่ (เอาสินค้าที่สั่งแล้วออก) + reset state + ล้างประวัติ cache
+                        Swal.fire({ title: "บันทึกสำเร็จ", text: data.message || "บันทึกเรียบร้อย", icon: "success", confirmButtonColor: BRAND, timer: 1600, showConfirmButton: false })
+                            .then(() => softRefreshAfterSave());
+                    } else {
+                        Swal.fire("ข้อผิดพลาด", (data && data.error) || "ไม่สามารถบันทึกได้", "error");
+                    }
+                }).catch(err => {
+                    console.error("saveOrder failed:", err);
+                    // ไม่สมมติว่าสำเร็จ — ตรวจสอบกับ server อีกครั้ง
+                    Swal.fire({
+                        title: "ไม่แน่ใจว่าบันทึกสำเร็จหรือไม่",
+                        text: "เชื่อมต่อขัดข้อง ต้องการตรวจสอบกับเซิร์ฟเวอร์อีกครั้งหรือไม่?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: BRAND,
+                        cancelButtonText: "ปิด",
+                        confirmButtonText: "ตรวจสอบ"
+                    }).then(r => {
+                        if (r.isConfirmed) {
+                            ordersCache = null;
+                            fetchOrders(true).then(all => {
+                                // ดูว่ามีรายการล่าสุดตรงกับที่ส่งไปไหม
+                                const recent = all.slice(0, orders.length);
+                                const matched = recent.filter(o => o.branchCode === splitBranch(branch).code).length;
+                                if (matched > 0) {
+                                    clearDraft();
+                                    Swal.fire({ title: "ยืนยันแล้ว", text: "พบคำสั่งซื้อในระบบ", icon: "success", timer: 1500, showConfirmButton: false })
+                                        .then(() => softRefreshAfterSave());
+                                } else {
+                                    Swal.fire("ไม่พบคำสั่งซื้อ", "อาจยังไม่ถูกบันทึก กรุณาลองบันทึกใหม่", "warning");
+                                }
+                            }).catch(() => showError("ไม่สามารถตรวจสอบได้", "ลองรีเฟรชหน้าแล้วบันทึกอีกครั้ง"));
+                        }
                     });
+                });
             });
         }
 
-        // ================= ประวัติคำสั่งซื้อ (จากชีต Orders) =================
+        // Soft refresh หลังบันทึก: ไม่ reload หน้า
+        function softRefreshAfterSave() {
+            ordersCache = null; // บังคับประวัติดึงใหม่
+            state.promoQty = {};
+            state.normalCart = [];
+            state.promoRenderedKeys = new Set();
+            state.normalRenderedKeys = new Set();
+
+            showLoading("กำลังอัปเดตรายการ...");
+            Promise.all([
+                fetchJson(`${API_URL}?action=getProducts&branch=${encodeURIComponent(state.branch)}`),
+                fetchJson(`${API_URL}?action=getRMSProducts&branch=${encodeURIComponent(state.branch)}`)
+            ]).then(([promoData, normalData]) => {
+                closeLoading();
+                state.promoProducts = (promoData || []).map((item, index) => ({ ...item, originalIndex: index }));
+                state.normalProducts = normalData || [];
+
+                renderPromoTypeFilters();
+                renderNormalCart();
+                applyPromoView(null);
+                switchMode("promo");
+                toastMini("อัปเดตรายการเรียบร้อย");
+            }).catch(err => {
+                closeLoading();
+                console.error("softRefresh failed:", err);
+                toastMini("อัปเดตไม่สำเร็จ ลองรีเฟรชหน้า");
+            });
+        }
+
+        // ================= ประวัติคำสั่งซื้อ =================
         let ordersCache = null;
         const charts = {};
 
         function fetchOrders(force) {
             if (ordersCache && !force) return Promise.resolve(ordersCache);
-            return fetch(`${API_URL}?action=getOrders`)
-                .then(res => res.json())
+            return fetchJson(`${API_URL}?action=getOrders&limit=2000`)
                 .then(data => {
                     ordersCache = Array.isArray(data) ? data : [];
                     return ordersCache;
@@ -1079,7 +1593,7 @@
 
         function loadHistory(force) {
             const body = $("historyBody");
-            body.innerHTML = `<div class="text-center text-muted py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">กำลังโหลด...</div></div>`;
+            body.innerHTML = skeletonList(4);
             fetchOrders(force).then(setHistoryData).catch(() => {
                 $("historyFilters").style.display = "none";
                 body.innerHTML = `<div class="empty-state">โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชอีกครั้ง</div>`;
@@ -1102,17 +1616,20 @@
             applyHistoryFilters();
         }
 
-        function applyHistoryFilters() {
+        function getFilteredHistory() {
             const code = $("histBranch").value;
             const from = $("histFrom").value ? new Date($("histFrom").value + "T00:00:00").getTime() : null;
             const to = $("histTo").value ? new Date($("histTo").value + "T23:59:59").getTime() : null;
-            const filtered = historyOrders.filter(o => {
+            return historyOrders.filter(o => {
                 if (code && o.branchCode !== code) return false;
                 if (from && (o.ts || 0) < from) return false;
                 if (to && (o.ts || 0) > to) return false;
                 return true;
             });
-            renderHistoryList(filtered);
+        }
+
+        function applyHistoryFilters() {
+            renderHistoryList(getFilteredHistory());
         }
 
         function clearHistoryFilters() {
@@ -1151,7 +1668,7 @@
                             <div class="fw-semibold" style="font-size:13px;line-height:1.3;">${escapeHtml(o.name)}</div>
                             <div class="meta-text">${escapeHtml(o.barcode)} • ${o.duQty} DU × ${o.duSize} • ${escapeHtml(o.promoType || "-")}</div>
                         </div>
-                        <button class="del-btn" title="ลบรายการนี้" onclick="deleteOrderItem('${escapeHtml(g.branchCode)}', ${g.ts}, '${escapeHtml(o.barcode)}')">
+                        <button class="del-btn" title="ลบรายการนี้" data-act="del-item" data-branch="${escapeHtml(g.branchCode)}" data-ts="${g.ts}" data-barcode="${escapeHtml(o.barcode)}">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         </button>
                     </div>`).join("");
@@ -1164,7 +1681,7 @@
                             </div>
                             <div class="d-flex align-items-center gap-2">
                                 <span class="badge bg-secondary">${g.items.length} • ${pieces} ชิ้น</span>
-                                <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:11px;" onclick="deleteOrderBatch('${escapeHtml(g.branchCode)}', ${g.ts})">ยกเลิกบิล</button>
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:11px;" data-act="del-batch" data-branch="${escapeHtml(g.branchCode)}" data-ts="${g.ts}">ยกเลิกบิล</button>
                             </div>
                         </div>
                         ${rows}
@@ -1172,7 +1689,17 @@
             }).join("");
         }
 
-        // ---------- ยกเลิก/ลบคำสั่งซื้อ ----------
+        // delegation สำหรับปุ่มลบใน history
+        $("historyBody").addEventListener("click", (e) => {
+            const btn = e.target.closest("[data-act]");
+            if (!btn) return;
+            const branchCode = btn.dataset.branch;
+            const ts = Number(btn.dataset.ts);
+            const barcode = btn.dataset.barcode;
+            if (btn.dataset.act === "del-item") deleteOrderItem(branchCode, ts, barcode);
+            else if (btn.dataset.act === "del-batch") deleteOrderBatch(branchCode, ts);
+        });
+
         function deleteOrderItem(branchCode, ts, barcode) {
             Swal.fire({ title: "ยกเลิกรายการนี้?", text: "ลบสินค้ารายการนี้ออกจากคำสั่งซื้อ", icon: "warning", showCancelButton: true, confirmButtonColor: "#e63946", cancelButtonText: "ยกเลิก", confirmButtonText: "ลบ" })
                 .then(r => { if (r.isConfirmed) doDeleteOrder({ branchCode, ts, barcode }); });
@@ -1183,16 +1710,16 @@
         }
         function doDeleteOrder(payload) {
             Swal.fire({ title: "กำลังลบ...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            fetch(`${API_URL}?action=deleteOrder`, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
-                .then(res => res.json())
+            fetchJson(`${API_URL}?action=deleteOrder`, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
                 .then(data => {
-                    Swal.fire({ title: "ลบแล้ว", text: data.message || "ดำเนินการเรียบร้อย", icon: "success", timer: 1500, showConfirmButton: false });
+                    ordersCache = null;
+                    Swal.fire({ title: "ลบแล้ว", text: (data && data.message) || "ดำเนินการเรียบร้อย", icon: "success", timer: 1500, showConfirmButton: false });
                     loadHistory(true);
                 })
                 .catch(() => Swal.fire("ผิดพลาด", "ลบไม่สำเร็จ ลองใหม่อีกครั้ง", "error"));
         }
 
-        // ================= กราฟสถิติการสั่งสินค้า =================
+        // ================= กราฟสถิติ =================
         let statsOrders = [];
 
         function openStats() {
@@ -1208,12 +1735,15 @@
                 body.innerHTML = `
                     <div class="stats-filter">
                         <span class="label-tiny">ช่วงวันที่</span>
-                        <input type="date" id="statsFrom" class="form-control" onchange="applyStatsFilters()">
+                        <input type="date" id="statsFrom" class="form-control">
                         <span class="text-muted small">ถึง</span>
-                        <input type="date" id="statsTo" class="form-control" onchange="applyStatsFilters()">
-                        <button class="btn btn-sm btn-link p-0 text-decoration-none" onclick="clearStatsFilters()">ล้าง</button>
+                        <input type="date" id="statsTo" class="form-control">
+                        <button class="btn btn-sm btn-link p-0 text-decoration-none" id="btnStatsClear">ล้าง</button>
                     </div>
                     <div id="statsContent"></div>`;
+                $("statsFrom").addEventListener("change", applyStatsFilters);
+                $("statsTo").addEventListener("change", applyStatsFilters);
+                $("btnStatsClear").addEventListener("click", clearStatsFilters);
                 renderStatsContent(statsOrders);
             }).catch(() => {
                 body.innerHTML = `<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>`;
@@ -1239,7 +1769,7 @@
 
         function renderStatsContent(orders) {
             const content = $("statsContent");
-            Object.values(charts).forEach(c => c && c.destroy());
+            Object.values(charts).forEach(c => c && c.destroy && c.destroy());
 
             if (!orders.length) {
                 content.innerHTML = `<div class="empty-state">ไม่พบข้อมูลในช่วงวันที่ที่เลือก</div>`;
@@ -1272,19 +1802,19 @@
                 <div class="chart-card"><div class="section-title mb-2">สินค้าสั่งมากที่สุด 10 อันดับ</div><div class="chart-wrap"><canvas id="chartProduct"></canvas></div></div>
                 <div class="chart-card"><div class="section-title mb-2">สัดส่วนตาม Promotion Type</div><div class="chart-wrap"><canvas id="chartType"></canvas></div></div>`;
 
-            const PALETTE = ["#00205b", "#0a3a8f", "#e63946", "#1e8e5a", "#f4a261", "#6a4c93", "#2a9d8f", "#e76f51", "#457b9d", "#9d4edd"];
+            const PALETTE = ["#00205b", "#0a4fb5", "#e63946", "#1e8e5a", "#f4a261", "#6a4c93", "#2a9d8f", "#e76f51", "#457b9d", "#9d4edd"];
 
             const branchSorted = Object.entries(byBranch).sort((a, b) => b[1] - a[1]);
             charts.branch = new Chart($("chartBranch"), {
                 type: "bar",
-                data: { labels: branchSorted.map(e => e[0]), datasets: [{ label: "ชิ้น", data: branchSorted.map(e => e[1]), backgroundColor: "#00205b", borderRadius: 6 }] },
+                data: { labels: branchSorted.map(e => e[0]), datasets: [{ label: "ชิ้น", data: branchSorted.map(e => e[1]), backgroundColor: "#0a4fb5", borderRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } } } }
             });
 
             const productTop = Object.entries(byProduct).sort((a, b) => b[1] - a[1]).slice(0, 10);
             charts.product = new Chart($("chartProduct"), {
                 type: "bar",
-                data: { labels: productTop.map(e => e[0]), datasets: [{ label: "ชิ้น", data: productTop.map(e => e[1]), backgroundColor: "#0a3a8f", borderRadius: 6 }] },
+                data: { labels: productTop.map(e => e[0]), datasets: [{ label: "ชิ้น", data: productTop.map(e => e[1]), backgroundColor: "#e63946", borderRadius: 6 }] },
                 options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 10 }, callback: function (v) { const lbl = this.getLabelForValue(v); return lbl.length > 28 ? lbl.slice(0, 28) + "…" : lbl; } } } } }
             });
 
@@ -1296,8 +1826,71 @@
             });
         }
 
+        // ---------- Skeleton ----------
+        function skeletonList(n) {
+            let out = "";
+            for (let i = 0; i < n; i++) {
+                out += `<div class="skel-card">
+                    <div class="skel skel-line" style="width:70%;height:16px;"></div>
+                    <div class="skel skel-line" style="width:40%;"></div>
+                    <div class="skel skel-line" style="width:90%;height:42px;margin-top:14px;"></div>
+                </div>`;
+            }
+            return out;
+        }
+
+        // ---------- Wire up all event listeners (XSS-safe, no inline handlers) ----------
+        function bindEvents() {
+            // header
+            $("btnStats").addEventListener("click", openStats);
+            $("btnHistory").addEventListener("click", openHistory);
+
+            // branch picker
+            $("branchTrigger").addEventListener("click", (e) => { e.stopPropagation(); toggleBranchList(); });
+            $("branchOptions").addEventListener("click", (e) => {
+                const opt = e.target.closest(".branch-option");
+                if (opt) selectBranch(opt.dataset.value);
+            });
+            $("branchSearch").addEventListener("input", (e) => filterBranchesDebounced(e.target.value));
+            document.addEventListener("click", (e) => {
+                if (!e.target.closest(".branch-picker")) closeBranchList();
+            });
+
+            // tabs
+            $("tab-promo").addEventListener("click", () => switchMode("promo"));
+            $("tab-normal").addEventListener("click", () => switchMode("normal"));
+            $("tab-summary").addEventListener("click", () => switchMode("summary"));
+
+            // promo search
+            $("btnPromoSearch").addEventListener("click", searchPromoBarcode);
+            $("promoSearchInput").addEventListener("keypress", (e) => { if (e.key === "Enter") searchPromoBarcode(); });
+
+            // normal search
+            $("btnNormalSearch").addEventListener("click", searchNormalBarcode);
+            $("normalSearchInput").addEventListener("keypress", (e) => { if (e.key === "Enter") searchNormalBarcode(); });
+
+            // submit
+            $("btnSubmit").addEventListener("click", processSubmit);
+
+            // history
+            $("btnHistRefresh").addEventListener("click", () => loadHistory(true));
+            $("btnHistExport").addEventListener("click", exportHistoryCSV);
+            $("btnHistClear").addEventListener("click", clearHistoryFilters);
+            $("histBranch").addEventListener("change", applyHistoryFilters);
+            $("histFrom").addEventListener("change", applyHistoryFilters);
+            $("histTo").addEventListener("change", applyHistoryFilters);
+
+            // header scroll effect
+            window.addEventListener("scroll", () => {
+                const h = $("appHeader");
+                if (window.scrollY > 8) h.classList.add("scrolled");
+                else h.classList.remove("scrolled");
+            }, { passive: true });
+        }
+
         // ---------- Init ----------
         buildBranchPicker();
+        bindEvents();
     </script>
 </body>
 </html>
